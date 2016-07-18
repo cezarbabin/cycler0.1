@@ -138,7 +138,7 @@ function createLights() {
 // Making a sea object
 Sea = function(color, width){
 	
-	var geom = new THREE.BoxGeometry(width,1,600,40,10);
+	var geom = new THREE.BoxGeometry(width,1,590,40,10);
 	
 	// rotate the geometry on the x axis
 	//geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
@@ -150,6 +150,9 @@ Sea = function(color, width){
 		opacity:1,
 		shading:THREE.FlatShading,
 	});
+
+	mat.polygonOffset = true;
+	mat.polygonOffsetFactor = 0.1;
 
 	// To create an object in Three.js, we have to create a mesh 
 	// which is a combination of a geometry and some material
@@ -275,29 +278,23 @@ function createSky(){
 
 var k = 0;
 function loop(){
-	//console.log(seaArray[0].mesh.position); 
-	// Rotate the propeller, the sea and the sky
-	//airplane.propeller.rotation.x += 0.3;
-	//sea.mesh.rotation.y += .005;
-
 	for (var i = 0; i < 5; i++) {
-		seaArray[i].mesh.position.z += 2;
-		if (seaArray[k%5].mesh.position.z > 600){
-			var mesh = seaArray[k%5].mesh;
-			var geometry = seaArray[k%5].mesh.geometry;
-			var material = seaArray[k%5].mesh.material;
+		seaArray[i].mesh.position.z += 10;
+
+		if (seaArray[0].mesh.position.z > 600){
+			//console.log('hit');
+
+			var mesh = seaArray[0].mesh;
+			var geometry = seaArray[0].mesh.geometry;
+			var material = seaArray[0].mesh.material;
 
 			scene.remove(mesh);
-
-			//mesh.dispose(); // new
 			geometry.dispose();
 			material.dispose();
-
-			//increment array
-			k++; 
-			console.log(k);
+			seaArray.shift()
 
 			addAnother();
+			k++; 
 		}
 	}
 
@@ -310,18 +307,22 @@ function loop(){
 
 function addAnother() {
 
-	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
+	var colors = [Colors.blue, Colors.red];
 
-	
-	var temp = new Sea(colors[k%5], 800);
+	var temp = new Sea(colors[k%2], 400);
 
 	// push it a little bit at the bottom of the scene
-	temp.mesh.position.z = -600 * (k%5 - 1);
+	console.log(k);
+
+	temp.mesh.position.z = -600 * 4;
+	
+	scene.add(temp.mesh);
 
 	seaArray.push(temp);
 
+
 	// add the mesh of the sea to the scene
-	scene.add(temp.mesh);
+	
 
 
 }
