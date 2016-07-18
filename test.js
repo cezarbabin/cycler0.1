@@ -193,8 +193,6 @@ Obstacle = function(width){
 		//var mesh = new THREE.Mesh(geom);
 		var mesh = new THREE.Mesh(geom);
 
-		console.log('hit');
-
 		mesh.position.z = Math.random() * 590;
 		//mesh.position.z = 100;
 		mesh.position.x = posNeg() * Math.random() * width/4;
@@ -222,27 +220,26 @@ function posNeg(){
 
 // Instantiate the road and add it to the scene:
 var roadArray = [];
+var obstArray = [];
 function createRoad(){
 
 	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
-	var tempObstacle = new Obstacle(800);
-	tempObstacle.mesh.position.y = 0;
-
-	scene.add(tempObstacle.mesh);
-
-
 
 	for (var i = 0; i < 5; i++) {
 		var temp = new Road(colors[i], 800);
+		var tempObstacle = new Obstacle(800);
 		
 
 		// push it a little bit at the bottom of the scene
 		temp.mesh.position.z = -600 * i;
+		tempObstacle.mesh.position.z = -600 * i;
 
 		roadArray.push(temp);
+		obstArray.push(tempObstacle);
 
 		// add the mesh of the road to the scene
 		scene.add(temp.mesh);
+		scene.add(tempObstacle.mesh);
 		
 
 	}
@@ -366,7 +363,7 @@ function createSky(){
 	scene.add(sky.mesh);
 }
 
-var speed = 3;
+var speed = 700;
 var k = 0;
 function loop(){
 	stats.update();
@@ -374,9 +371,12 @@ function loop(){
 	updateKeyboard();
 	for (var i = 0; i < 5; i++) {
 		roadArray[i].mesh.position.z += speed;
+		obstArray[i].mesh.position.z += speed;
 		if (roadArray[0].mesh.position.z > 600){
 			disposeOfRoadOptimized(roadArray[0]);
+			disposeOfRoadOptimized(obstArray[0]);
 			roadArray.shift();
+			obstArray.shift();
 			addAnother();
 			k++; 
 		}
@@ -452,15 +452,19 @@ function addAnother() {
 	var colors = [Colors.blue, Colors.red];
 
 	var temp = new Road(colors[k%2], 400);
+	var tempObst = new Obstacle(400);
 
 	// push it a little bit at the bottom of the scene
 	console.log(k);
 
 	temp.mesh.position.z = -600 * 4;
+	tempObst.mesh.position.z = -600 * 4;
 	
 	scene.add(temp.mesh);
+	scene.add(tempObst.mesh);
 
 	roadArray.push(temp);
+	obstArray.push(tempObst);
 
 
 	// add the mesh of the road to the scene
