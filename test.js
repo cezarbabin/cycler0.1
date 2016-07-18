@@ -23,7 +23,8 @@ function init() {
 
 	// add the objects
 	//createPlane();
-	createSea();
+	createRoad();
+	createPlayer();
 	createSky();
 
 	// start a loop that will update the objects' positions 
@@ -135,8 +136,8 @@ function createLights() {
 	scene.add(shadowLight);
 }
 
-// Making a sea object
-Sea = function(color, width){
+// Making a road object
+Road = function(color, width){
 	
 	var geom = new THREE.BoxGeometry(width,1,590,40,10);
 	
@@ -158,28 +159,52 @@ Sea = function(color, width){
 	// which is a combination of a geometry and some material
 	this.mesh = new THREE.Mesh(geom, mat);
 
-	// Allow the sea to receive shadows
+	// Allow the road to receive shadows
 	this.mesh.receiveShadow = true; 
 }
-// Instantiate the sea and add it to the scene:
-var seaArray = [];
-function createSea(){
+// Instantiate the road and add it to the scene:
+var roadArray = [];
+function createRoad(){
 
 	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
 
 	for (var i = 0; i < 5; i++) {
-		var temp = new Sea(colors[i], 800);
+		var temp = new Road(colors[i], 800);
 
 		// push it a little bit at the bottom of the scene
 		temp.mesh.position.z = -600 * i;
 
-		seaArray.push(temp);
+		roadArray.push(temp);
 
-		// add the mesh of the sea to the scene
+		// add the mesh of the road to the scene
 		scene.add(temp.mesh);
 
 	}
+}
 
+// Making a player
+Player = function(){
+	var geom = new THREE.BoxGeometry(20,20,20,40,10);
+
+	var mat = new THREE.MeshPhongMaterial({
+		color:Colors.brown,
+		transparent:true,
+		opacity:1,
+		shading:THREE.FlatShading,
+	});
+
+	this.mesh = new THREE.Mesh(geom, mat);
+
+	// Allow the road to receive shadows
+	this.mesh.receiveShadow = true; 
+
+}
+var player;
+function createPlayer(){
+	player = new Player();
+	player.mesh.position.y = 10;
+	player.mesh.position.z = 180;
+	scene.add(player.mesh);
 }
 
 // Setup the clouds
@@ -269,7 +294,6 @@ Sky = function(){
 // Now we instantiate the sky and push its center a bit
 // towards the bottom of the screen
 var sky;
-
 function createSky(){
 	sky = new Sky();
 	sky.mesh.position.y = -600;
@@ -279,19 +303,19 @@ function createSky(){
 var k = 0;
 function loop(){
 	for (var i = 0; i < 5; i++) {
-		seaArray[i].mesh.position.z += 10;
+		roadArray[i].mesh.position.z += 10;
 
-		if (seaArray[0].mesh.position.z > 600){
+		if (roadArray[0].mesh.position.z > 600){
 			//console.log('hit');
 
-			var mesh = seaArray[0].mesh;
-			var geometry = seaArray[0].mesh.geometry;
-			var material = seaArray[0].mesh.material;
+			var mesh = roadArray[0].mesh;
+			var geometry = roadArray[0].mesh.geometry;
+			var material = roadArray[0].mesh.material;
 
 			scene.remove(mesh);
 			geometry.dispose();
 			material.dispose();
-			seaArray.shift()
+			roadArray.shift()
 
 			addAnother();
 			k++; 
@@ -309,7 +333,7 @@ function addAnother() {
 
 	var colors = [Colors.blue, Colors.red];
 
-	var temp = new Sea(colors[k%2], 400);
+	var temp = new Road(colors[k%2], 400);
 
 	// push it a little bit at the bottom of the scene
 	console.log(k);
@@ -318,11 +342,8 @@ function addAnother() {
 	
 	scene.add(temp.mesh);
 
-	seaArray.push(temp);
+	roadArray.push(temp);
 
 
-	// add the mesh of the sea to the scene
-	
-
-
+	// add the mesh of the road to the scene
 }
