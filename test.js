@@ -176,25 +176,38 @@ Road = function(color, width){
 	this.mesh.receiveShadow = true; 
 }
 
-function generateObstacles(mesh, width){
+Obstacle = function(width){
 	// Generate obstacles randomly
-	for (var i = 0; i < 5; i++) {
-		var geom = new THREE.BoxGeometry(20,20,20,40,10);
 
-		var mat = new THREE.MeshPhongMaterial({
+	var singleGeometry = new THREE.Geometry();
+	var geom = new THREE.BoxGeometry(20,20,20,40,10);
+
+	var mat = new THREE.MeshPhongMaterial({
 			color:Colors.white,
 			transparent:true,
 			opacity:1,
 			shading:THREE.FlatShading,
 		});
 
-		var obstacle = new THREE.Mesh(geom, mat);
+	for (var i = 0; i < 5; i++) {
+		//var mesh = new THREE.Mesh(geom);
+		var mesh = new THREE.Mesh(geom);
 
-		obstacle.position.z = Math.random() * 590;
-		obstacle.position.x = posNeg() * Math.random() * width/2;
+		console.log('hit');
 
-		mesh.add(obstacle);
+		mesh.position.z = Math.random() * 590;
+		//mesh.position.z = 100;
+		mesh.position.x = posNeg() * Math.random() * width/4;
+		//mesh.position.x = -80;
+		mesh.position.y = 10;
+
+		mesh.updateMatrix();
+
+		singleGeometry.merge(mesh.geometry, mesh.matrix);
 	}
+
+	this.mesh = new THREE.Mesh(singleGeometry, mat);
+	//this.mesh = mesh;
 
 }
 
@@ -212,9 +225,16 @@ var roadArray = [];
 function createRoad(){
 
 	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
+	var tempObstacle = new Obstacle(800);
+	tempObstacle.mesh.position.y = 0;
+
+	scene.add(tempObstacle.mesh);
+
+
 
 	for (var i = 0; i < 5; i++) {
 		var temp = new Road(colors[i], 800);
+		
 
 		// push it a little bit at the bottom of the scene
 		temp.mesh.position.z = -600 * i;
@@ -223,6 +243,7 @@ function createRoad(){
 
 		// add the mesh of the road to the scene
 		scene.add(temp.mesh);
+		
 
 	}
 }
@@ -345,7 +366,7 @@ function createSky(){
 	scene.add(sky.mesh);
 }
 
-var speed = 700;
+var speed = 3;
 var k = 0;
 function loop(){
 	stats.update();
