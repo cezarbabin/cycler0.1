@@ -59,10 +59,9 @@ function createScene() {
 	
 	// Set the position of the camera
 	camera.position.x = 0;
-	camera.position.z = 100;
-	camera.position.y = 0;
+	camera.position.z = 200;
+	camera.position.y = 100;
 	camera.rotation.x = -45 * Math.PI / 180;
-	//camera.rotation.y = 45 * Math.PI / 180;
 	
 	// Create the renderer
 	renderer = new THREE.WebGLRenderer({ 
@@ -137,21 +136,18 @@ function createLights() {
 }
 
 // Making a sea object
-Sea = function(){
+Sea = function(color, width){
 	
-	// create the geometry (shape) of the cylinder;
-	// the parameters are: 
-	// radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-	var geom = new THREE.CylinderGeometry(400,400,600,600,10);
+	var geom = new THREE.BoxGeometry(width,1,600,40,10);
 	
 	// rotate the geometry on the x axis
-	geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+	//geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
 	
 	// create the material 
 	var mat = new THREE.MeshPhongMaterial({
-		color:Colors.blue,
+		color:color,
 		transparent:true,
-		opacity:.6,
+		opacity:1,
 		shading:THREE.FlatShading,
 	});
 
@@ -163,15 +159,24 @@ Sea = function(){
 	this.mesh.receiveShadow = true; 
 }
 // Instantiate the sea and add it to the scene:
-var sea;
+var seaArray = [];
 function createSea(){
-	sea = new Sea();
 
-	// push it a little bit at the bottom of the scene
-	sea.mesh.position.y = -600;
+	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
 
-	// add the mesh of the sea to the scene
-	scene.add(sea.mesh);
+	for (var i = 0; i < 5; i++) {
+		var temp = new Sea(colors[i], 800);
+
+		// push it a little bit at the bottom of the scene
+		temp.mesh.position.z = -600 * i;
+
+		seaArray.push(temp);
+
+		// add the mesh of the sea to the scene
+		scene.add(temp.mesh);
+
+	}
+
 }
 
 // Setup the clouds
@@ -268,15 +273,55 @@ function createSky(){
 	scene.add(sky.mesh);
 }
 
+var k = 0;
 function loop(){
+	//console.log(seaArray[0].mesh.position); 
 	// Rotate the propeller, the sea and the sky
 	//airplane.propeller.rotation.x += 0.3;
-	sea.mesh.rotation.z += .005;
-	sea.mesh.position.z += 1;
+	//sea.mesh.rotation.y += .005;
+
+	for (var i = 0; i < 5; i++) {
+		seaArray[i].mesh.position.z += 2;
+		if (seaArray[k%5].mesh.position.z > 600){
+			var mesh = seaArray[k%5].mesh;
+			var geometry = seaArray[k%5].mesh.geometry;
+			var material = seaArray[k%5].mesh.material;
+
+			scene.remove(mesh);
+
+			//mesh.dispose(); // new
+			geometry.dispose();
+			material.dispose();
+
+			//increment array
+			k++; 
+			console.log(k);
+
+			addAnother();
+		}
+	}
 
 	// render the scene
 	renderer.render(scene, camera);
 
 	// call the loop function again
 	requestAnimationFrame(loop);
+}
+
+function addAnother() {
+
+	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
+
+	
+	var temp = new Sea(colors[k%5], 800);
+
+	// push it a little bit at the bottom of the scene
+	temp.mesh.position.z = -600 * (k%5 - 1);
+
+	seaArray.push(temp);
+
+	// add the mesh of the sea to the scene
+	scene.add(temp.mesh);
+
+
 }
