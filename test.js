@@ -3,6 +3,13 @@ var scene,
 		camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 		renderer, container, clock;
 
+var stats = new Stats();
+
+var clock = new THREE.Clock();
+var keyboard = new KeyboardState();
+
+var collidableMeshList = [];
+
 var Colors = {
 	red:0xf25346,
 	white:0xd8d0d1,
@@ -25,7 +32,7 @@ function init() {
 	//createPlane();
 	createRoad();
 	createPlayer();
-	createSky();
+	//createSky();
 
 	// start a loop that will update the objects' positions 
 	// and render the scene on each frame
@@ -86,6 +93,13 @@ function createScene() {
 	// container we created in the HTML
 	container = document.getElementById('world');
 	container.appendChild(renderer.domElement);
+
+	// framerate stats
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
 	
 	// Listen to the screen: if the user resizes it
 	// we have to update the camera and the renderer size
@@ -138,11 +152,12 @@ function createLights() {
 
 // Making a road object
 Road = function(color, width){
+
+	// create container
+	//this.mesh = new THREE.Object3D();
 	
+	// create geometry
 	var geom = new THREE.BoxGeometry(width,1,590,40,10);
-	
-	// rotate the geometry on the x axis
-	//geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
 	
 	// create the material 
 	var mat = new THREE.MeshPhongMaterial({
@@ -152,16 +167,46 @@ Road = function(color, width){
 		shading:THREE.FlatShading,
 	});
 
-	mat.polygonOffset = true;
-	mat.polygonOffsetFactor = 0.1;
+	var base = new THREE.Mesh(geom, mat);
+	this.mesh = base;
 
-	// To create an object in Three.js, we have to create a mesh 
-	// which is a combination of a geometry and some material
-	this.mesh = new THREE.Mesh(geom, mat);
+	//generateObstacles(this.mesh, width);
 
 	// Allow the road to receive shadows
 	this.mesh.receiveShadow = true; 
 }
+
+function generateObstacles(mesh, width){
+	// Generate obstacles randomly
+	for (var i = 0; i < 5; i++) {
+		var geom = new THREE.BoxGeometry(20,20,20,40,10);
+
+		var mat = new THREE.MeshPhongMaterial({
+			color:Colors.white,
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var obstacle = new THREE.Mesh(geom, mat);
+
+		obstacle.position.z = Math.random() * 590;
+		obstacle.position.x = posNeg() * Math.random() * width/2;
+
+		mesh.add(obstacle);
+	}
+
+}
+
+function posNeg(){
+	var n = Math.random();
+	if (n > 0.5) {
+		return -1;
+	} else {
+		return 1;
+	}
+}
+
 // Instantiate the road and add it to the scene:
 var roadArray = [];
 function createRoad(){
@@ -300,23 +345,17 @@ function createSky(){
 	scene.add(sky.mesh);
 }
 
+var speed = 700;
 var k = 0;
 function loop(){
+	stats.update();
+
+	updateKeyboard();
 	for (var i = 0; i < 5; i++) {
-		roadArray[i].mesh.position.z += 10;
-
+		roadArray[i].mesh.position.z += speed;
 		if (roadArray[0].mesh.position.z > 600){
-			//console.log('hit');
-
-			var mesh = roadArray[0].mesh;
-			var geometry = roadArray[0].mesh.geometry;
-			var material = roadArray[0].mesh.material;
-
-			scene.remove(mesh);
-			geometry.dispose();
-			material.dispose();
-			roadArray.shift()
-
+			disposeOfRoadOptimized(roadArray[0]);
+			roadArray.shift();
 			addAnother();
 			k++; 
 		}
@@ -327,6 +366,64 @@ function loop(){
 
 	// call the loop function again
 	requestAnimationFrame(loop);
+}
+
+function disposeOfRoad(el){
+
+	for (var obj in el.children) {
+		console.log('here');
+		scene.remove(obj.mesh);
+		obj.mesh.geometry.dispose();
+		obj.mesh.material.dispose();
+
+		renderer.dispose(obj.mesh);
+		renderer.dispose(obj.mesh.geometry);
+		renderer.dispose(obj.mesh.material);
+
+		mesh = undefined;
+		obj = undefined;
+	}
+	el.children = undefined;
+	el = undefined;
+}
+
+function disposeOfRoadOptimized(obj) {
+	scene.remove(obj.mesh);
+	obj.mesh.geometry.dispose();
+	obj.mesh.material.dispose();
+
+	renderer.dispose(obj.mesh);
+	renderer.dispose(obj.mesh.geometry);
+	renderer.dispose(obj.mesh.material);
+
+	obj.mesh = undefined;
+	obj = undefined;
+
+}
+
+function updateKeyboard(){
+	keyboard.update();
+
+	var mesh = player.mesh;
+
+	var moveDistance = 50 * clock.getDelta(); 
+	if ( keyboard.down("left") ) 
+		mesh.translateX( -50 );
+		//console.log('left');
+	if ( keyboard.down("right") ) 
+		mesh.translateX(  50 );
+	if ( keyboard.pressed("A") )
+		mesh.translateX( -moveDistance );
+	if ( keyboard.pressed("D") )
+		mesh.translateX(  moveDistance );
+	if ( keyboard.down("R") )
+		mesh.material.color = new THREE.Color(0xff0000);
+	if ( keyboard.up("R") )
+		mesh.material.color = new THREE.Color(0x0000ff);
+	if ( keyboard.down("S") )
+		speed += 5;
+	if ( keyboard.up("S") )
+		speed = 3;
 }
 
 function addAnother() {
