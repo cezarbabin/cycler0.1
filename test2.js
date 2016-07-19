@@ -19,39 +19,22 @@ var Colors = {
 };
 
 function init() {
-	// set up the scene, the camera and the renderer
 	createScene();
-
-	// add the lights
 	createLights();
-
-	// add the objects
-	//createPlane();
 	createRoad();
+
 	createPlayer();
-	//createSky();
+
 	scene.add( meshSpline );
-	//scene.add( splineObject );
-	// start a loop that will update the objects' positions 
-	// and render the scene on each frame
+
 	loop();
 }
 
 function createScene() {
-	// Get the width and the height of the screen,
-	// use them to set up the aspect ratio of the camera 
-	// and the size of the renderer.
 	HEIGHT = window.innerHeight;
 	WIDTH = window.innerWidth;
-
-	// Create the scene
 	scene = new THREE.Scene();
-
-	// Add a fog effect to the scene; same color as the
-	// background color used in the style sheet
 	scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
-	
-	// Create the camera
 	aspectRatio = WIDTH / HEIGHT;
 	fieldOfView = 120;
 	nearPlane = 1;
@@ -59,9 +42,10 @@ function createScene() {
 	
 
 	camera = new THREE.PerspectiveCamera;
-	camera.position.z = 80;
-	camera.position.y = 0;
-	//camera.rotation.x = 25 * Math.PI / 180;
+	camera.position.x = 0;
+	camera.position.z = 200;
+	camera.position.y = 50;
+	//camera.rotation.x = 90 * Math.PI / 180;
 	
 	// Create the renderer
 	renderer = new THREE.WebGLRenderer({ 
@@ -142,7 +126,7 @@ function createLights() {
 	scene.add(shadowLight);
 }
 
-var randomPoints = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 476.773194135871),
+var randomPoints2 = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 476.773194135871),
 	new THREE.Vector3(-225.4891213071726, 178.8107531261258, 285.3094285584699),
 	new THREE.Vector3(-632.6720101292041, 239.72799271191008, 80.6955646173692),
 	new THREE.Vector3(-878.2864580990286, 456.8855411916313, -632.9582192820432),
@@ -153,7 +137,7 @@ var randomPoints = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 476
 	new THREE.Vector3(-578.7684355599442, 1068.451029475109, -345.5103110288372),
 	new THREE.Vector3(-279.1934885064545, 1058.6396179616245, 9.419939608452523)];
 
-var randomPoints2 = [new THREE.Vector3(-323.0550147134401, 10, 476.773194135871),
+var randomPoints = [new THREE.Vector3(-323.0550147134401, 10, 476.773194135871),
 	new THREE.Vector3(-225.4891213071726, 10, 285.3094285584699),
 	new THREE.Vector3(-632.6720101292041, 10, 80.6955646173692),
 	new THREE.Vector3(-878.2864580990286, 10, -632.9582192820432),
@@ -164,9 +148,20 @@ var randomPoints2 = [new THREE.Vector3(-323.0550147134401, 10, 476.773194135871)
 	new THREE.Vector3(-578.7684355599442, 10, -345.5103110288372),
 	new THREE.Vector3(-279.1934885064545, 10, 9.419939608452523)];
 
+var randomPoints3 = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 10),
+	new THREE.Vector3(-225.4891213071726, 178.8107531261258, 10),
+	new THREE.Vector3(-632.6720101292041, 239.72799271191008, 10),
+	new THREE.Vector3(-878.2864580990286, 456.8855411916313, 10),
+	new THREE.Vector3(-303.8032494241374, 560.7781987719341, 10),
+	new THREE.Vector3(-542.9538873114697, 792.558268986469, 10),
+	new THREE.Vector3(-413.6004915238309, 874.0640096754225, 10),
+	new THREE.Vector3(-173.59237648970083, 951.0395135489118, 10),
+	new THREE.Vector3(-578.7684355599442, 1068.451029475109, 10),
+	new THREE.Vector3(-279.1934885064545, 1058.6396179616245, 10)];
+
 
 for (var i = 0; i < randomPoints.length; i++){
-	randomPoints[i] = randomPoints[i].multiplyScalar(1);
+	randomPoints[i] = randomPoints[i].multiplyScalar(10);
 }
 
 var spline = new THREE.SplineCurve3(randomPoints);
@@ -194,8 +189,6 @@ var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
 var material = new THREE.MeshLambertMaterial( { color: 0xb00000, wireframe: false } );
 var meshSpline = new THREE.Mesh( geometry, material );
 
-
-// Making a road object
 Road = function(color, width){
 
 	// create container
@@ -221,48 +214,6 @@ Road = function(color, width){
 	this.mesh.receiveShadow = true; 
 }
 
-Obstacle = function(width){
-	// Generate obstacles randomly
-
-	var singleGeometry = new THREE.Geometry();
-	var geom = new THREE.BoxGeometry(20,20,20,40,10);
-
-	var mat = new THREE.MeshPhongMaterial({
-			color:Colors.white,
-			transparent:true,
-			opacity:1,
-			shading:THREE.FlatShading,
-		});
-
-	for (var i = 0; i < 5; i++) {
-		//var mesh = new THREE.Mesh(geom);
-		var mesh = new THREE.Mesh(geom);
-
-		mesh.position.z = Math.random() * 590;
-		//mesh.position.z = 100;
-		mesh.position.x = posNeg() * Math.random() * width/4;
-		//mesh.position.x = -80;
-		mesh.position.y = 10;
-
-		mesh.updateMatrix();
-
-		singleGeometry.merge(mesh.geometry, mesh.matrix);
-	}
-
-	this.mesh = new THREE.Mesh(singleGeometry, mat);
-	//this.mesh = mesh;
-}
-
-function posNeg(){
-	var n = Math.random();
-	if (n > 0.5) {
-		return -1;
-	} else {
-		return 1;
-	}
-}
-
-// Instantiate the road and add it to the scene:
 var roadArray = [];
 var obstArray = [];
 function createRoad(){
@@ -271,23 +222,21 @@ function createRoad(){
 
 	for (var i = 0; i < 5; i++) {
 		var temp = new Road(colors[i], 800);
-		var tempObstacle = new Obstacle(800);
 		
 
 		// push it a little bit at the bottom of the scene
 		temp.mesh.position.z = -600 * i;
-		tempObstacle.mesh.position.z = -600 * i;
 
 		roadArray.push(temp);
-		obstArray.push(tempObstacle);
 
 		// add the mesh of the road to the scene
 		scene.add(temp.mesh);
-		scene.add(tempObstacle.mesh);
 		
 
 	}
 }
+
+
 
 // Making a player
 Player = function(){
@@ -314,103 +263,9 @@ function createPlayer(){
 	scene.add(player.mesh);
 }
 
-// Setup the clouds
-Cloud = function(){
-	// Create an empty container that will hold the different parts of the cloud
-	this.mesh = new THREE.Object3D();
-	
-	// create a cube geometry;
-	// this shape will be duplicated to create the cloud
-	var geom = new THREE.BoxGeometry(20,20,20);
-	
-	// create a material; a simple white material will do the trick
-	var mat = new THREE.MeshPhongMaterial({
-		color:Colors.white,  
-	});
-	
-	// duplicate the geometry a random number of times
-	var nBlocs = 3+Math.floor(Math.random()*3);
-	for (var i=0; i<nBlocs; i++ ){
-		
-		// create the mesh by cloning the geometry
-		var m = new THREE.Mesh(geom, mat); 
-		
-		// set the position and the rotation of each cube randomly
-		m.position.x = i*15;
-		m.position.y = Math.random()*10;
-		m.position.z = Math.random()*10;
-		m.rotation.z = Math.random()*Math.PI*2;
-		m.rotation.y = Math.random()*Math.PI*2;
-		
-		// set the size of the cube randomly
-		var s = .1 + Math.random()*.9;
-		m.scale.set(s,s,s);
-		
-		// allow each cube to cast and to receive shadows
-		m.castShadow = true;
-		m.receiveShadow = true;
-		
-		// add the cube to the container we first created
-		this.mesh.add(m);
-	} 
-}
-// Define a Sky Object
-Sky = function(){
-	// Create an empty container
-	this.mesh = new THREE.Object3D();
-	
-	// choose a number of clouds to be scattered in the sky
-	this.nClouds = 40;
-	
-	// To distribute the clouds consistently,
-	// we need to place them according to a uniform angle
-	var stepAngle = Math.PI*2 / this.nClouds;
-	
-	// create the clouds
-	for(var i=0; i<this.nClouds; i++){
-		var c = new Cloud();
-	 
-		// set the rotation and the position of each cloud;
-		// for that we use a bit of trigonometry
-		var a = stepAngle*i; // this is the final angle of the cloud
-		var h = 750; //+ Math.random()*200; // this is the distance between the center of the axis and the cloud itself
 
-		// Trigonometry!!! I hope you remember what you've learned in Math :)
-		// in case you don't: 
-		// we are simply converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
-		c.mesh.position.y = Math.sin(a)*h;
-		c.mesh.position.x = Math.cos(a)*h;
-
-		// rotate the cloud according to its position
-		c.mesh.rotation.z = a + Math.PI/2;
-
-		// for a better result, we position the clouds 
-		// at random depths inside of the scene
-		c.mesh.position.z = -400-Math.random()*800;
-		// ******* THATS WHY THERE IS ONLY ONE REGION
-		
-		// we also set a random scale for each cloud
-		var s = 1+Math.random()*2;
-		c.mesh.scale.set(s,s,s);
-
-		// do not forget to add the mesh of each cloud in the scene
-		this.mesh.add(c.mesh);  
-	}  
-}
-
-// Now we instantiate the sky and push its center a bit
-// towards the bottom of the screen
-var sky;
-function createSky(){
-	sky = new Sky();
-	sky.mesh.position.y = -600;
-	scene.add(sky.mesh);
-}
-
-var speed = 3;
-var k = 0;
 var camPosIndex = 0;
-var up = new THREE.Vector3( 0, 1, 0 );
+var up = new THREE.Vector3(0, 1, 0 );
 var axis = new THREE.Vector3( );
 function loop(){
 	stats.update();
@@ -426,105 +281,28 @@ function loop(){
     camPosIndex = 0;
   }
   var camPos = spline.getPoint(camPosIndex / 1000);
-  var tangent = spline.getTangent(camPosIndex / 1000).normalize();
-	axis.crossVectors( up, tangent ).normalize();
-	var radians = Math.acos( up.dot( tangent ) );
+  var tangent = spline.getTangent(camPosIndex / 1000);
+	
+	//axis.crossVectors( up, tangent ).normalize();
+	//var radians = Math.acos( up.dot( tangent ) );
   //var camPos = meshSpline.geometry.vertices[camPosIndex];
 
   player.mesh.position.x = camPos.x;
   player.mesh.position.y = camPos.y;
   player.mesh.position.z = camPos.z;
+
+  var rad = Math.atan2(tangent.x, tangent.y);
+
+  //console.log(tangent);
   
+  //player.mesh.rotation.y = rad  ;
+
   //player.mesh.rotation.x = camRot.x;
   //player.mesh.rotation.y = camRot.y;
-  player.mesh.quaternion.setFromAxisAngle( axis, radians );
+  //player.mesh.quaternion.setFromAxisAngle( axis, radians );
   
   //console.log(camPos.x, camPos.y, camPos.z)
   //camera.lookAt(spline.getPoint((camPosIndex+1) / 10000));
 
 }
 
-function disposeOfRoad(el){
-	for (var obj in el.children) {
-		console.log('here');
-		scene.remove(obj.mesh);
-		obj.mesh.geometry.dispose();
-		obj.mesh.material.dispose();
-
-		renderer.dispose(obj.mesh);
-		renderer.dispose(obj.mesh.geometry);
-		renderer.dispose(obj.mesh.material);
-
-		mesh = undefined;
-		obj = undefined;
-	}
-	el.children = undefined;
-	el = undefined;
-}
-
-function disposeOfRoadOptimized(obj) {
-	scene.remove(obj.mesh);
-	obj.mesh.geometry.dispose();
-	obj.mesh.material.dispose();
-
-	renderer.dispose(obj.mesh);
-	renderer.dispose(obj.mesh.geometry);
-	renderer.dispose(obj.mesh.material);
-
-	obj.mesh = undefined;
-	obj = undefined;
-}
-
-function updateKeyboard(){
-	keyboard.update();
-
-	var mesh = player.mesh;
-
-	var moveDistance = 50 * clock.getDelta(); 
-	if ( keyboard.down("left") ) 
-		mesh.translateX( -50 );
-		//console.log('left');
-	if ( keyboard.down("right") ) 
-		mesh.translateX(  50 );
-	if ( keyboard.pressed("A") )
-		mesh.translateX( -moveDistance );
-	if ( keyboard.pressed("D") )
-		mesh.translateX(  moveDistance );
-	if ( keyboard.pressed("W") ) {
-		mesh.rotation.z += 10 * Math.PI / 180;
-	}
-	if ( keyboard.pressed("Q") ) {
-		mesh.rotation.z -= 10 * Math.PI / 180;
-	}
-	if ( keyboard.down("R") )
-		mesh.material.color = new THREE.Color(0xff0000);
-	if ( keyboard.up("R") )
-		mesh.material.color = new THREE.Color(0x0000ff);
-	if ( keyboard.down("S") )
-		speed += 5;
-	if ( keyboard.up("S") )
-		speed = 3;
-}
-
-function addAnother() {
-
-	var colors = [Colors.blue, Colors.red];
-
-	var temp = new Road(colors[k%2], 200);
-	var tempObst = new Obstacle(200);
-
-	// push it a little bit at the bottom of the scene
-	console.log(k);
-
-	temp.mesh.position.z = -600 * 4;
-	tempObst.mesh.position.z = -600 * 4;
-	
-	scene.add(temp.mesh);
-	scene.add(tempObst.mesh);
-
-	roadArray.push(temp);
-	obstArray.push(tempObst);
-
-
-	// add the mesh of the road to the scene
-}
