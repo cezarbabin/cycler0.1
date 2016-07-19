@@ -430,6 +430,12 @@ function updateKeyboard(){
 		mesh.translateX( -moveDistance );
 	if ( keyboard.pressed("D") )
 		mesh.translateX(  moveDistance );
+	if ( keyboard.pressed("W") ) {
+		mesh.rotation.z += 10 * Math.PI / 180;
+	}
+	if ( keyboard.pressed("Q") ) {
+		mesh.rotation.z -= 10 * Math.PI / 180;
+	}
 	if ( keyboard.down("R") )
 		mesh.material.color = new THREE.Color(0xff0000);
 	if ( keyboard.up("R") )
