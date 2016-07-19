@@ -1,4 +1,3 @@
-
 var scene,
 		camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 		renderer, container, clock;
@@ -31,7 +30,8 @@ function init() {
 	createRoad();
 	createPlayer();
 	//createSky();
-
+	scene.add( meshSpline );
+	//scene.add( splineObject );
 	// start a loop that will update the objects' positions 
 	// and render the scene on each frame
 	loop();
@@ -60,8 +60,8 @@ function createScene() {
 
 	camera = new THREE.PerspectiveCamera;
 	camera.position.z = 80;
-	camera.position.y = 50;
-	camera.rotation.x = -25 * Math.PI / 180;
+	camera.position.y = 0;
+	//camera.rotation.x = 25 * Math.PI / 180;
 	
 	// Create the renderer
 	renderer = new THREE.WebGLRenderer({ 
@@ -142,6 +142,59 @@ function createLights() {
 	scene.add(shadowLight);
 }
 
+var randomPoints = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 476.773194135871),
+	new THREE.Vector3(-225.4891213071726, 178.8107531261258, 285.3094285584699),
+	new THREE.Vector3(-632.6720101292041, 239.72799271191008, 80.6955646173692),
+	new THREE.Vector3(-878.2864580990286, 456.8855411916313, -632.9582192820432),
+	new THREE.Vector3(-303.8032494241374, 560.7781987719341, -314.6171915891019),
+	new THREE.Vector3(-542.9538873114697, 792.558268986469, -129.9714803216823),
+	new THREE.Vector3(-413.6004915238309, 874.0640096754225, -26.57707111030811),
+	new THREE.Vector3(-173.59237648970083, 951.0395135489118, -286.9272193873354),
+	new THREE.Vector3(-578.7684355599442, 1068.451029475109, -345.5103110288372),
+	new THREE.Vector3(-279.1934885064545, 1058.6396179616245, 9.419939608452523)];
+
+var randomPoints2 = [new THREE.Vector3(-323.0550147134401, 10, 476.773194135871),
+	new THREE.Vector3(-225.4891213071726, 10, 285.3094285584699),
+	new THREE.Vector3(-632.6720101292041, 10, 80.6955646173692),
+	new THREE.Vector3(-878.2864580990286, 10, -632.9582192820432),
+	new THREE.Vector3(-303.8032494241374, 10, -314.6171915891019),
+	new THREE.Vector3(-542.9538873114697, 10, -129.9714803216823),
+	new THREE.Vector3(-413.6004915238309, 10, -26.57707111030811),
+	new THREE.Vector3(-173.59237648970083, 10, -286.9272193873354),
+	new THREE.Vector3(-578.7684355599442, 10, -345.5103110288372),
+	new THREE.Vector3(-279.1934885064545, 10, 9.419939608452523)];
+
+
+for (var i = 0; i < randomPoints.length; i++){
+	randomPoints[i] = randomPoints[i].multiplyScalar(1);
+}
+
+var spline = new THREE.SplineCurve3(randomPoints);
+var geometry = new THREE.Geometry();
+geometry.vertices = spline.getPoints( 150 );
+
+var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+
+//Create the final Object3d to add to the scene
+var splineObject = new THREE.Line( geometry, material );
+
+var extrudeSettings = {
+					steps			: 1000,
+					bevelEnabled	: false,
+					extrudePath		: spline
+				};
+var sqLength = 20;
+var squareShape = new THREE.Shape();
+squareShape.moveTo( 0,0 );
+squareShape.lineTo( 0, sqLength );
+squareShape.lineTo( sqLength, sqLength );
+squareShape.lineTo( sqLength, 0 );
+squareShape.lineTo( 0, 0 );
+var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
+var material = new THREE.MeshLambertMaterial( { color: 0xb00000, wireframe: false } );
+var meshSpline = new THREE.Mesh( geometry, material );
+
+
 // Making a road object
 Road = function(color, width){
 
@@ -198,7 +251,6 @@ Obstacle = function(width){
 
 	this.mesh = new THREE.Mesh(singleGeometry, mat);
 	//this.mesh = mesh;
-
 }
 
 function posNeg(){
@@ -252,7 +304,6 @@ Player = function(){
 
 	// Allow the road to receive shadows
 	this.mesh.receiveShadow = true; 
-
 }
 var player;
 function createPlayer(){
@@ -358,32 +409,42 @@ function createSky(){
 
 var speed = 3;
 var k = 0;
+var camPosIndex = 0;
+var up = new THREE.Vector3( 0, 1, 0 );
+var axis = new THREE.Vector3( );
 function loop(){
 	stats.update();
-
-	updateKeyboard();
-	for (var i = 0; i < 5; i++) {
-		roadArray[i].mesh.position.z += speed;
-		obstArray[i].mesh.position.z += speed;
-		if (roadArray[0].mesh.position.z > 600){
-			disposeOfRoadOptimized(roadArray[0]);
-			disposeOfRoadOptimized(obstArray[0]);
-			roadArray.shift();
-			obstArray.shift();
-			addAnother();
-			k++; 
-		}
-	}
 
 	// render the scene
 	renderer.render(scene, camera);
 
 	// call the loop function again
 	requestAnimationFrame(loop);
+
+	camPosIndex++;
+  if (camPosIndex > 1000) {
+    camPosIndex = 0;
+  }
+  var camPos = spline.getPoint(camPosIndex / 1000);
+  var tangent = spline.getTangent(camPosIndex / 1000).normalize();
+	axis.crossVectors( up, tangent ).normalize();
+	var radians = Math.acos( up.dot( tangent ) );
+  //var camPos = meshSpline.geometry.vertices[camPosIndex];
+
+  player.mesh.position.x = camPos.x;
+  player.mesh.position.y = camPos.y;
+  player.mesh.position.z = camPos.z;
+  
+  //player.mesh.rotation.x = camRot.x;
+  //player.mesh.rotation.y = camRot.y;
+  player.mesh.quaternion.setFromAxisAngle( axis, radians );
+  
+  //console.log(camPos.x, camPos.y, camPos.z)
+  //camera.lookAt(spline.getPoint((camPosIndex+1) / 10000));
+
 }
 
 function disposeOfRoad(el){
-
 	for (var obj in el.children) {
 		console.log('here');
 		scene.remove(obj.mesh);
@@ -412,7 +473,6 @@ function disposeOfRoadOptimized(obj) {
 
 	obj.mesh = undefined;
 	obj = undefined;
-
 }
 
 function updateKeyboard(){
