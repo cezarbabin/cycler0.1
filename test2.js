@@ -8,7 +8,7 @@ var stats = new Stats();
 var clock = new THREE.Clock();
 var keyboard = new KeyboardState();
 
-var collidableMeshList = [];
+window.addEventListener('load', init, false);
 
 var Colors = {
 	red:0xf25346,
@@ -18,8 +18,6 @@ var Colors = {
 	brownDark:0x23190f,
 	blue:0x68c3c0,
 };
-
-window.addEventListener('load', init, false);
 
 function init() {
 	// set up the scene, the camera and the renderer
@@ -58,18 +56,12 @@ function createScene() {
 	fieldOfView = 120;
 	nearPlane = 1;
 	farPlane = 20000;
-	camera = new THREE.PerspectiveCamera(
-		fieldOfView,
-		aspectRatio,
-		nearPlane,
-		farPlane
-		);
 	
-	// Set the position of the camera
-	camera.position.x = 0;
-	camera.position.z = 200;
-	camera.position.y = 150;
-	camera.rotation.x = -45 * Math.PI / 180;
+
+	camera = new THREE.PerspectiveCamera;
+	camera.position.z = 80;
+	camera.position.y = 50;
+	camera.rotation.x = -25 * Math.PI / 180;
 	
 	// Create the renderer
 	renderer = new THREE.WebGLRenderer({ 
@@ -267,6 +259,7 @@ function createPlayer(){
 	player = new Player();
 	player.mesh.position.y = 10;
 	player.mesh.position.z = 180;
+	player.mesh.add(camera);
 	scene.add(player.mesh);
 }
 
