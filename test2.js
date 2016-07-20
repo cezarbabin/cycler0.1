@@ -22,21 +22,16 @@ var Colors = {
 function init() {
 	createScene();
 	createLights();
-
-
 	createRoad();
-
-
-
 	createPlayer();
-
 	createH();
+	setXInitialPosition();
+	animate();
+}
 
+function setXInitialPosition(){
 	var pt = spline.getPoint( 0.00005);
 	xposition = -100;
-	
-
-	animate();
 }
 
 function createH(){
@@ -58,7 +53,6 @@ function createH(){
   spline = new THREE.SplineCurve3(points);
 
   var splineObject = new THREE.Line( geometry, material );
-
   var extrudeSettings = {
                       steps           : 1000,
                       bevelEnabled    : false,
@@ -72,13 +66,16 @@ function createH(){
   squareShape.lineTo( 1, 0 );
   squareShape.lineTo( 0, 0 );
   var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
-  var material = new THREE.MeshLambertMaterial( { color: 0xffffff, wireframe: false } );
+  var material = new THREE.MeshLambertMaterial( { color: Colors.blue, wireframe: false } );
 
-  console.log(geometry.vertices[1000]);
-  console.log(geometry.vertices[2001]);
-  for (var j = 0; j < geometry.vertices.length -1 ; j += 10){
-  	//console.log(j);
-  	if (typeof(geometry.vertices[j]) == 'undefined') {
+  var splinePoints = spline.getPoints(10000);
+
+
+  var up = new THREE.Vector3(0, 1, 0);
+	var axis = new THREE.Vector3( );
+	var radians;
+  for (var j = 0; j < 10000 ; j += 100){
+  	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
   	var geom = new THREE.BoxGeometry(40,40,40,40,10);
@@ -97,23 +94,33 @@ function createH(){
 
 		//console.log(geom.vertices[j]);
 
-		newMesh.position.x = geometry.vertices[j].x; 
-		newMesh.position.y = geometry.vertices[j].y; 
-		newMesh.position.z = geometry.vertices[j].z; 
+		newMesh.position.set(splinePoints[j].x, splinePoints[j].y, splinePoints[j].z);
 
 
 
 		scene.add(newMesh);
+		
+		tangent = spline.getTangent( j/10000 ).normalize();
+    
+    // calculate the axis to rotate around
+    axis.crossVectors( up, tangent ).normalize();
 
-		if (j%20 == 0) {
-			newMesh.translateX( - 20 - Math.random() * 150);
-			newMesh.translateZ( - 10 + 30 * Math.random());
-		} else {
-			newMesh.translateX(  20 + Math.random() * 140);
-			newMesh.translateZ( - 10 + 30 * Math.random());
-		}
+    // calcluate the angle between the up vector and the tangent
+    radians = Math.acos( up.dot( tangent ) ); 
 
-		//console.log(geom.vertices[j]);
+    newMesh.quaternion.setFromAxisAngle( axis, radians );
+
+    newMesh.rotation.x = Math.random()  * 3 * Math.PI / 180;
+
+    var rnd =  Math.random() * 150;
+		newMesh.translateX( - rnd - 50);
+		console.log(rnd);
+
+    if (radians > 0) {
+    	//newMesh.translateZ(Math.sin(radians) * 20);
+    } else  {
+    	//newMesh.translateZ(Math.cos(radians) * 20);
+    }
   }
 
   var meshSpline = new THREE.Mesh( geometry, material );
@@ -128,7 +135,6 @@ function createH(){
   var line = new THREE.Line(geometry, material);
 
   scene.add( meshSpline );
-
 }
 
 function createScene() {
@@ -141,17 +147,11 @@ function createScene() {
 	nearPlane = 1;
 	farPlane = 20000;
 	
-
 	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
   camera.position.z = 70;
   camera.position.y = -65;
   camera.rotation.x = 60 * Math.PI / 180;
 
-  //controls = new THREE.OrbitControls( camera );
-  //controls.addEventListener( 'change', render );
-	//camera.rotation.x = 90 * Math.PI / 180;
-	
-	// Create the renderer
 	renderer = new THREE.WebGLRenderer({ 
 		// Allow transparency to show the gradient background
 		// we defined in the CSS
@@ -162,8 +162,6 @@ function createScene() {
 		antialias: true 
 	});
 
-	// Define the size of the renderer; in this case,
-	// it will fill the entire screen
 	renderer.setSize(WIDTH, HEIGHT);
 	
 	// Enable shadow rendering
@@ -332,7 +330,6 @@ function createPlayer(){
 	player.mesh.position.z = 180;
 	player.mesh.add(camera);
 	scene.add(player.mesh);
-	
 }
 
 function animate() {
@@ -353,12 +350,10 @@ function render() {
 		keyboard.update();
 		var moveDistance = 50 * clock.getDelta(); 
 		if ( keyboard.pressed("A") ) {
-			xposition = xposition-moveDistance ;
-		
+			xposition = xposition-moveDistance ;		
 		}
     if ( keyboard.pressed("D") ) {
 			xposition = xposition+moveDistance ;
-		
 		}
     
     // set the marker position
@@ -379,7 +374,6 @@ function render() {
     // set the quaternion
     player.mesh.quaternion.setFromAxisAngle( axis, radians );
     
-
     radians = Math.asin(straight.dot(tangent));
     player.mesh.rotation.x = radians * Math.PI / 180;
     //player.mesh.quaternion.setFromAxisAngle( axis2, radians );
@@ -390,13 +384,8 @@ function render() {
     } else  {
     	player.mesh.translateZ(Math.cos(radians) * 20);
     }
-
-    //console.log(radians);
-
-    //update(radians);
-
         
-    t = (t >= 1) ? 0 : t += 0.00005;
+    t = (t >= 1) ? 0 : t += 0.0001;
 
     renderer.render(scene, camera); 
 }
@@ -407,25 +396,18 @@ function update(radians)
 	var moveDistance = 50 * clock.getDelta(); 
 	if ( keyboard.down("left") ) 
 		mesh.translateX( -50 );
-		
 	if ( keyboard.down("right") ) 
 		mesh.translateX(  50 );
 	if ( keyboard.pressed("A") ) {
 		console.log('hi');
 		player.mesh.translateX( -moveDistance );
-	
-	}
-		
+	}	
 	if ( keyboard.pressed("D") )
 		player.mesh.translateX(  moveDistance );
-		
 	if ( keyboard.down("R") )
 		mesh.material.color = new THREE.Color(0xff0000);
 	if ( keyboard.up("R") )
 		mesh.material.color = new THREE.Color(0x0000ff);
-		
-	//controls.update();
-	//stats.update();
 }
 
 
