@@ -65,15 +65,20 @@ new THREE.Vector3(0, 0, 750)
   var sqLength = 20;
   var squareShape = new THREE.Shape();
   squareShape.moveTo( 0,0 );
+  squareShape.lineTo( -20,sqLength);
   squareShape.lineTo( 0,sqLength);
-  squareShape.lineTo( 20,sqLength);
+  
   squareShape.lineTo( 1,0);
   squareShape.lineTo( 1,sqLength*9);
   squareShape.lineTo( 0,sqLength*9);
-  squareShape.lineTo( 0, sqLength *10 );
-  squareShape.lineTo( 1, sqLength * 10 );
-  squareShape.lineTo( 1, 0 );
-  squareShape.lineTo( 0, 0 );
+
+  squareShape.lineTo( -20,sqLength*9);
+  squareShape.lineTo( 0, sqLength *11 );
+
+  //squareShape.lineTo( 1, sqLength * 10 );
+  //squareShape.lineTo( 1, 0 );
+
+
   var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
   var material = new THREE.MeshLambertMaterial( { color: 0x8A2BE2, wireframe: false } );
 
@@ -83,20 +88,61 @@ new THREE.Vector3(0, 0, 750)
   var pyramid = new THREE.OctahedronGeometry(500, 0);
 
   var pyramidMesh = new THREE.Mesh(pyramid, material);
+  pyramidMesh.x = 0;
+  pyramidMesh.y = 0;
+  pyramidMesh.z = 1000;
   scene.add(pyramidMesh);
 
   var anotherShape = new THREE.Shape();
-  //var corn = new THREE.SHAPE()
 
-//  var bbox = new THREE.Box3().setFromObject(obj);
+  var splinePoints = spline.getPoints(1000);
 
-  var splinePoints = spline.getPoints(10000);
+	//
+	var coneMasterGeometry = new THREE.Geometry();
+	for (var j = 0; j < 1000; j += 1){
+  	if (typeof(splinePoints[j]) == 'undefined') {
+  		break;
+		}
+  	
 
+		var mat = new THREE.MeshPhongMaterial({
+			color:Colors.blue,
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var r = Math.random();
+		var geom = new THREE.ConeGeometry( r* 300, r * 150, 3 );
+		if (j%2 ==0 ){
+			geom.translate(sqLength*46, 0 ,0);
+		} 
+
+
+		var newMesh = new THREE.Mesh(geom, mat);
+
+		// Allow the road to receive shadows
+		newMesh.receiveShadow = true; 
+
+
+		newMesh.rotation.x = 90 * Math.PI/180;
+
+		//newMesh.translateX(-400);
+
+		//console.log(geom.vertices[j]);
+
+			newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
+	
+
+		scene.add(newMesh);
+	}
+
+	var splinePoints = spline.getPoints(10000);
 
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
-  for (var j = 0; j < 10000 ; j += 100){
+  for (var j = 0; j < 10000; j += 100){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
@@ -134,9 +180,9 @@ new THREE.Vector3(0, 0, 750)
 
     newMesh.rotation.x = Math.random()  * 3 * Math.PI / 180;
 
-    var rnd =  Math.random() * 150;
+    var rnd =  Math.random() * 100;
 		newMesh.translateX( - rnd - 50);
-		console.log(rnd);
+		//console.log(rnd);
 
     if (radians > 0) {
     	//newMesh.translateZ(Math.sin(radians) * 20);
@@ -175,22 +221,14 @@ function createScene() {
   camera.rotation.x = 60 * Math.PI / 180;
 
 	renderer = new THREE.WebGLRenderer({ 
-		// Allow transparency to show the gradient background
-		// we defined in the CSS
 		alpha: true, 
-
-		// Activate the anti-aliasing; this is less performant,
-		// but, as our project is low-poly based, it should be fine :)
 		antialias: true 
 	});
 
 	renderer.setSize(WIDTH, HEIGHT);
-	
-	// Enable shadow rendering
+
 	renderer.shadowMap.enabled = true;
 	
-	// Add the DOM element of the renderer to the 
-	// container we created in the HTML
 	container = document.getElementById('world');
 	container.appendChild(renderer.domElement);
 
@@ -358,7 +396,7 @@ function render() {
     	player.mesh.translateZ(Math.cos(radians) * 20);
     }
         
-    t = (t >= 1) ? 0 : t += 0.001;
+    t = (t >= 1) ? 0 : t += 0.0004;
 
     renderer.render(scene, camera); 
 }
