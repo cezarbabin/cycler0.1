@@ -6,6 +6,7 @@ var stats = new Stats();
 
 var clock = new THREE.Clock();
 var keyboard = new KeyboardState();
+var xposition;
 
 window.addEventListener('load', init, false);
 
@@ -21,13 +22,113 @@ var Colors = {
 function init() {
 	createScene();
 	createLights();
+
+
 	createRoad();
+
+
 
 	createPlayer();
 
-	scene.add( meshSpline );
+	createH();
 
-	loop();
+	var pt = spline.getPoint( 0.00005);
+	xposition = -100;
+	
+
+	animate();
+}
+
+function createH(){
+	points =  [new THREE.Vector3(177.6076794686664, -189.59719456131666, 128.8401263489414),
+    new THREE.Vector3(-71.23931862284905, -153.9368085070406, 5.284478503819692),
+    new THREE.Vector3(-300.12290112941974, -144.47085896766586, 84.18142304788832),
+    new THREE.Vector3(-284.73829876413123, -158.77686893740247, -433.4249196789108),
+    new THREE.Vector3(-16.913449190888514, -153.90042496472668, -463.34498312188373),
+    new THREE.Vector3(551.6592551464272, -160.4979520898124, -620.8820906330495),
+    new THREE.Vector3(506.0060755889224, -169.487941154214, -23.248918892483424),
+    new THREE.Vector3(265.2380528628295, -165.47463489939983, 179.8685250961414)];
+    
+  for (var i = 0; i < points.length; i++){
+      var axis = new THREE.Vector3( 1, 0, 0 );
+      var angle = Math.PI / 2;
+      points[i].applyAxisAngle( axis, angle );
+      points[i].multiplyScalar(100); 
+  }
+  spline = new THREE.SplineCurve3(points);
+
+  var splineObject = new THREE.Line( geometry, material );
+
+  var extrudeSettings = {
+                      steps           : 1000,
+                      bevelEnabled    : false,
+                      extrudePath     : spline
+                  };
+  var sqLength = 20;
+  var squareShape = new THREE.Shape();
+  squareShape.moveTo( 0,0 );
+  squareShape.lineTo( 0, sqLength *10 );
+  squareShape.lineTo( 1, sqLength * 10 );
+  squareShape.lineTo( 1, 0 );
+  squareShape.lineTo( 0, 0 );
+  var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
+  var material = new THREE.MeshLambertMaterial( { color: 0xffffff, wireframe: false } );
+
+  console.log(geometry.vertices[1000]);
+  console.log(geometry.vertices[2001]);
+  for (var j = 0; j < geometry.vertices.length -1 ; j += 10){
+  	//console.log(j);
+  	if (typeof(geometry.vertices[j]) == 'undefined') {
+  		break;
+		}
+  	var geom = new THREE.BoxGeometry(40,40,40,40,10);
+
+		var mat = new THREE.MeshPhongMaterial({
+			color:Colors.red,
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var newMesh = new THREE.Mesh(geom, mat);
+
+		// Allow the road to receive shadows
+		newMesh.receiveShadow = true; 
+
+		//console.log(geom.vertices[j]);
+
+		newMesh.position.x = geometry.vertices[j].x; 
+		newMesh.position.y = geometry.vertices[j].y; 
+		newMesh.position.z = geometry.vertices[j].z; 
+
+
+
+		scene.add(newMesh);
+
+		if (j%20 == 0) {
+			newMesh.translateX( - 20 - Math.random() * 150);
+			newMesh.translateZ( - 10 + 30 * Math.random());
+		} else {
+			newMesh.translateX(  20 + Math.random() * 140);
+			newMesh.translateZ( - 10 + 30 * Math.random());
+		}
+
+		//console.log(geom.vertices[j]);
+  }
+
+  var meshSpline = new THREE.Mesh( geometry, material );
+
+  var material = new THREE.LineBasicMaterial({
+      color: 0xff00f0,
+  });
+  var geometry = new THREE.Geometry();
+  for(var i = 0; i < spline.getPoints(200).length; i++){
+      geometry.vertices.push(spline.getPoints(200)[i]);  
+  }
+  var line = new THREE.Line(geometry, material);
+
+  scene.add( meshSpline );
+
 }
 
 function createScene() {
@@ -41,10 +142,13 @@ function createScene() {
 	farPlane = 20000;
 	
 
-	camera = new THREE.PerspectiveCamera;
-	camera.position.x = 0;
-	camera.position.z = 200;
-	camera.position.y = 50;
+	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+  camera.position.z = 70;
+  camera.position.y = -65;
+  camera.rotation.x = 60 * Math.PI / 180;
+
+  //controls = new THREE.OrbitControls( camera );
+  //controls.addEventListener( 'change', render );
 	//camera.rotation.x = 90 * Math.PI / 180;
 	
 	// Create the renderer
@@ -159,36 +263,6 @@ var randomPoints3 = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 10
 	new THREE.Vector3(-578.7684355599442, 1068.451029475109, 10),
 	new THREE.Vector3(-279.1934885064545, 1058.6396179616245, 10)];
 
-
-for (var i = 0; i < randomPoints.length; i++){
-	randomPoints[i] = randomPoints[i].multiplyScalar(10);
-}
-
-var spline = new THREE.SplineCurve3(randomPoints);
-var geometry = new THREE.Geometry();
-geometry.vertices = spline.getPoints( 150 );
-
-var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-
-//Create the final Object3d to add to the scene
-var splineObject = new THREE.Line( geometry, material );
-
-var extrudeSettings = {
-					steps			: 1000,
-					bevelEnabled	: false,
-					extrudePath		: spline
-				};
-var sqLength = 20;
-var squareShape = new THREE.Shape();
-squareShape.moveTo( 0,0 );
-squareShape.lineTo( 0, sqLength );
-squareShape.lineTo( sqLength, sqLength );
-squareShape.lineTo( sqLength, 0 );
-squareShape.lineTo( 0, 0 );
-var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
-var material = new THREE.MeshLambertMaterial( { color: 0xb00000, wireframe: false } );
-var meshSpline = new THREE.Mesh( geometry, material );
-
 Road = function(color, width){
 
 	// create container
@@ -213,7 +287,6 @@ Road = function(color, width){
 	// Allow the road to receive shadows
 	this.mesh.receiveShadow = true; 
 }
-
 var roadArray = [];
 var obstArray = [];
 function createRoad(){
@@ -235,8 +308,6 @@ function createRoad(){
 
 	}
 }
-
-
 
 // Making a player
 Player = function(){
@@ -261,48 +332,100 @@ function createPlayer(){
 	player.mesh.position.z = 180;
 	player.mesh.add(camera);
 	scene.add(player.mesh);
-}
-
-
-var camPosIndex = 0;
-var up = new THREE.Vector3(0, 1, 0 );
-var axis = new THREE.Vector3( );
-function loop(){
-	stats.update();
-
-	// render the scene
-	renderer.render(scene, camera);
-
-	// call the loop function again
-	requestAnimationFrame(loop);
-
-	camPosIndex++;
-  if (camPosIndex > 1000) {
-    camPosIndex = 0;
-  }
-  var camPos = spline.getPoint(camPosIndex / 1000);
-  var tangent = spline.getTangent(camPosIndex / 1000);
 	
-	//axis.crossVectors( up, tangent ).normalize();
-	//var radians = Math.acos( up.dot( tangent ) );
-  //var camPos = meshSpline.geometry.vertices[camPosIndex];
-
-  player.mesh.position.x = camPos.x;
-  player.mesh.position.y = camPos.y;
-  player.mesh.position.z = camPos.z;
-
-  var rad = Math.atan2(tangent.x, tangent.y);
-
-  //console.log(tangent);
-  
-  //player.mesh.rotation.y = rad  ;
-
-  //player.mesh.rotation.x = camRot.x;
-  //player.mesh.rotation.y = camRot.y;
-  //player.mesh.quaternion.setFromAxisAngle( axis, radians );
-  
-  //console.log(camPos.x, camPos.y, camPos.z)
-  //camera.lookAt(spline.getPoint((camPosIndex+1) / 10000));
-
 }
+
+function animate() {
+    requestAnimationFrame(animate);
+    render();
+}   
+var t = 0;
+var camPosIndex = 0;
+var up = new THREE.Vector3(0, 1, 0);
+var straight = new THREE.Vector3(-1, 0, 0);
+var axis = new THREE.Vector3( );
+var axis2 = new THREE.Vector3( );
+
+function render() {
+
+		stats.update();
+
+		keyboard.update();
+		var moveDistance = 50 * clock.getDelta(); 
+		if ( keyboard.pressed("A") ) {
+			xposition = xposition-moveDistance ;
+		
+		}
+    if ( keyboard.pressed("D") ) {
+			xposition = xposition+moveDistance ;
+		
+		}
+    
+    // set the marker position
+    pt = spline.getPoint( t );
+    player.mesh.position.set( pt.x, pt.y, pt.z);
+    player.mesh.translateX(xposition);
+    
+    // get the tangent to the curve
+    tangent = spline.getTangent( t ).normalize();
+    
+    // calculate the axis to rotate around
+    axis.crossVectors( up, tangent ).normalize();
+    axis2.crossVectors( straight, tangent ).normalize();
+    
+    // calcluate the angle between the up vector and the tangent
+    radians = Math.acos( up.dot( tangent ) );
+        
+    // set the quaternion
+    player.mesh.quaternion.setFromAxisAngle( axis, radians );
+    
+
+    radians = Math.asin(straight.dot(tangent));
+    player.mesh.rotation.x = radians * Math.PI / 180;
+    //player.mesh.quaternion.setFromAxisAngle( axis2, radians );
+
+    if (radians > 0) {
+    	player.mesh.translateZ(Math.sin(radians) * 20);
+
+    } else  {
+    	player.mesh.translateZ(Math.cos(radians) * 20);
+    }
+
+    //console.log(radians);
+
+    //update(radians);
+
+        
+    t = (t >= 1) ? 0 : t += 0.00005;
+
+    renderer.render(scene, camera); 
+}
+
+function update(radians)
+{
+	keyboard.update();
+	var moveDistance = 50 * clock.getDelta(); 
+	if ( keyboard.down("left") ) 
+		mesh.translateX( -50 );
+		
+	if ( keyboard.down("right") ) 
+		mesh.translateX(  50 );
+	if ( keyboard.pressed("A") ) {
+		console.log('hi');
+		player.mesh.translateX( -moveDistance );
+	
+	}
+		
+	if ( keyboard.pressed("D") )
+		player.mesh.translateX(  moveDistance );
+		
+	if ( keyboard.down("R") )
+		mesh.material.color = new THREE.Color(0xff0000);
+	if ( keyboard.up("R") )
+		mesh.material.color = new THREE.Color(0x0000ff);
+		
+	//controls.update();
+	//stats.update();
+}
+
 
