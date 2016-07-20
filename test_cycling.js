@@ -113,7 +113,7 @@ new THREE.Vector3(0, 0, 750)
 		});
 
 		var r = Math.random();
-		var geom = new THREE.ConeGeometry( r* 300, r * 150, 3 );
+		var geom = new THREE.ConeGeometry( r* 300, r * 250, 3 );
 		if (j%2 ==0 ){
 			geom.translate(sqLength*46, 0 ,0);
 		} 
@@ -209,7 +209,7 @@ function createScene() {
 	HEIGHT = window.innerHeight;
 	WIDTH = window.innerWidth;
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
+	scene.fog = new THREE.Fog(0xcccccc, 100, 950);
 	aspectRatio = WIDTH / HEIGHT;
 	fieldOfView = 120;
 	nearPlane = 1;
@@ -255,8 +255,8 @@ function createScene() {
 
 var hemisphereLight, shadowLight;
 function createLights() {
-	hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
-	shadowLight = new THREE.DirectionalLight(0xffffff, .9);
+	hemisphereLight = new THREE.HemisphereLight(0xcccccc,0x000000, .9)
+	shadowLight = new THREE.DirectionalLight(0xdddddd, .6);
 	shadowLight.position.set(150, 350, 350);
 	shadowLight.castShadow = true;
 	shadowLight.shadow.camera.left = -400;
