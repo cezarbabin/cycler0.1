@@ -246,21 +246,102 @@ function createRoad(){
 
 // Making a player
 Player = function(){
-	var geom = new THREE.BoxGeometry(20,20,20,40,10);
 
+	this.mesh = new THREE.Object3D();
+
+	// Make boat
+	var geom = new THREE.ConeGeometry( 5, 20, 32 );
+	geom.translate(0, 20, 0);
+	var cylinder = new THREE.CylinderGeometry( 5, 5, 20, 32 );
+	THREE.GeometryUtils.merge(geom, cylinder);
+	geom.rotateX(-90 * Math.PI / 180);
+	var backCone = new THREE.ConeGeometry( 5, 20, 32 );
+	backCone.rotateX(90 * Math.PI / 180);
+	backCone.translate(0, 0, 20);
+	THREE.GeometryUtils.merge(geom, backCone);
 	var mat = new THREE.MeshPhongMaterial({
 		color:Colors.brown,
 		transparent:true,
 		opacity:1,
 		shading:THREE.FlatShading,
 	});
+	var boat = new THREE.Mesh(geom, mat);
+	this.mesh.add(boat);
 
-	this.mesh = new THREE.Mesh(geom, mat);
+	//var geom = new new THREE.ConeGeometry( 5, 20, 32 );
 
-	// Allow the road to receive shadows
-	this.mesh.receiveShadow = true; 
 
+	// Body of the pilot
+	var bodyGeom = new THREE.BoxGeometry(5,5,5);
+	var bodyMat = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
+	bodyGeom.translate(0, 10, 0);
+	var body = new THREE.Mesh(bodyGeom, bodyMat);
+	this.mesh.add(body);
+
+	// Face of the pilot
+	var faceGeom = new THREE.BoxGeometry(10,10,10);
+	var faceMat = new THREE.MeshLambertMaterial({color:Colors.white});
+	var face = new THREE.Mesh(faceGeom, faceMat);
+	this.mesh.add(face);
+
+	// Hair element
+	var hairGeom = new THREE.BoxGeometry(4,4,4);
+	var hairMat = new THREE.MeshLambertMaterial({color:Colors.pink});
+	var hair = new THREE.Mesh(hairGeom, hairMat);
+	hairGeom.translate(0, 15, 0);
+	
+	// create a container for the hair
+	var hairs = new THREE.Object3D();
+
+	// create a container for the hairs at the top 
+	// of the head (the ones that will be animated)
+	this.hairsTop = new THREE.Object3D();
+
+	// create the hairs at the top of the head 
+	// and position them on a 3 x 4 grid
+	for (var i=0; i<12; i++){
+		var h = hair.clone();
+		var col = i%3;
+		var row = Math.floor(i/3);
+		var startPosZ = -0.5;
+		var startPosX = -0.5;
+		h.position.set(startPosX + row*0.5, 0, startPosZ + col*0.5);
+		h.scale.y = .75 + Math.random()*.25;
+		this.hairsTop.add(h);
+	}
+	hairs.add(this.hairsTop);
+
+	// create the hairs at the side of the face
+	var hairSideGeom = new THREE.BoxGeometry(3,1,0.5);
+
+	// create the hairs at the back of the head
+	var hairBackGeom = new THREE.BoxGeometry(0.5,1,2);
+	var hairBack = new THREE.Mesh(hairBackGeom, hairMat);
+	//hairBack.position.set(-0.0,-1,0)
+	hairs.add(hairBack);
+	hairs.position.set(-0.25,0.25,0);
+
+	this.mesh.add(hairs);
+
+	this.mesh.receiveShadow = true;
 }
+
+Player.prototype.updateHairs = function(){
+	
+	// get the hair
+	var hairs = this.hairsTop.children;
+
+	// update them according to the angle angleHairs
+	var l = hairs.length;
+	for (var i=0; i<l; i++){
+		var h = hairs[i];
+		// each hair element will scale on cyclical basis between 75% and 100% of its original size
+		h.scale.y = .75 + Math.cos(this.angleHairs+i/3)*.25;
+	}
+	// increment the angle for the next frame
+	this.angleHairs += 0.16;
+}
+
 var player;
 function createPlayer(){
 	player = new Player();
@@ -366,6 +447,7 @@ var speed = 3;
 var k = 0;
 function loop(){
 	stats.update();
+	//player.updateHairs();
 
 	updateKeyboard();
 	for (var i = 0; i < 5; i++) {
