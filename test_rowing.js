@@ -32,6 +32,7 @@ function init() {
 	//createPlane();
 	createRoad();
 	createPlayer();
+	createEnemy();
 	//createSky();
 
 	// start a loop that will update the objects' positions 
@@ -310,7 +311,7 @@ function createRoad(){
 }
 
 // Making a player
-Player = function(){
+Player = function(color, enemy){
 
 	this.mesh = new THREE.Object3D();
 
@@ -351,15 +352,18 @@ Player = function(){
 	this.mesh.add(face);
 
 	var helmetGeom = new THREE.SphereGeometry(3, 20, 20);
-	var helmetMat = new THREE.MeshLambertMaterial({color:0x00FF7F});
+	var helmetMat = new THREE.MeshLambertMaterial({color:color});
 	var helmet = new THREE.Mesh(helmetGeom, helmetMat);
 	helmetGeom.translate(0, 12, 1);
 	this.mesh.add(helmet);
 
-	
+	if (enemy){
+		
+	}
 
 	this.mesh.receiveShadow = true;
 }
+
 
 Player.prototype.updateHairs = function(){
 	
@@ -379,11 +383,20 @@ Player.prototype.updateHairs = function(){
 
 var player;
 function createPlayer(){
-	player = new Player();
+	player = new Player(0x00FF7F, false);
 	player.mesh.position.y = 10;
 	player.mesh.position.z = 180;
 	player.mesh.add(camera);
 	scene.add(player.mesh);
+}
+
+var enemy;
+function createEnemy(){
+	enemy = new Player(0x8A2BE2, true);
+	enemy.mesh.position.y = 10;
+	enemy.mesh.position.z = 90;
+	enemy.mesh.position.x = 20;
+	scene.add(enemy.mesh);
 }
 
 // Setup the clouds
@@ -484,10 +497,11 @@ var k = 0;
 function loop(){
 	stats.update();
 	//player.updateHairs();
-	console.log(mountainArray);
-	console.log(obstArray);
+	//console.log(mountainArray);
+	//console.log(obstArray);
 
 	updateKeyboard();
+	enemy.mesh.position.z += 0.1;
 	for (var i = 0; i < 5; i++) {
 		roadArray[i].mesh.position.z += speed;
 		obstArray[i].mesh.position.z += speed;
@@ -580,9 +594,9 @@ function addAnother() {
 	// push it a little bit at the bottom of the scene
 	console.log(k);
 
-	temp.mesh.position.z = -590 * 4;
-	tempObst.mesh.position.z = -590 * 4;
-	tempMountain.mesh.position.z = -590 * 4;
+	temp.mesh.position.z = -580 * 4;
+	tempObst.mesh.position.z = -580 * 4;
+	tempMountain.mesh.position.z = -580 * 4;
 	
 	scene.add(temp.mesh);
 	scene.add(tempObst.mesh);
