@@ -61,6 +61,10 @@ function createH(){
   var sqLength = 20;
   var squareShape = new THREE.Shape();
   squareShape.moveTo( 0,0 );
+  squareShape.lineTo( 0,sqLength);
+  squareShape.lineTo( 1,sqLength);
+  squareShape.lineTo( 1,sqLength*9);
+  squareShape.lineTo( 0,sqLength*9);
   squareShape.lineTo( 0, sqLength *10 );
   squareShape.lineTo( 1, sqLength * 10 );
   squareShape.lineTo( 1, 0 );
@@ -78,7 +82,7 @@ function createH(){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
-  	var geom = new THREE.BoxGeometry(40,40,40,40,10);
+  	var geom = new THREE.DodecahedronGeometry(20, 0 );
 
 		var mat = new THREE.MeshPhongMaterial({
 			color:Colors.red,
