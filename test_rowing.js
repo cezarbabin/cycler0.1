@@ -230,7 +230,8 @@ Obstacle = function(width){
 
 Mountain = function(width){
 	var singleGeometry = new THREE.Geometry();
-	var geom = new THREE.DodecahedronGeometry(300,Math.random()*3 | 0);
+	var geom = new THREE.DodecahedronGeometry(300,Math.random()*2 | 0);
+	geom.rotateX(Math.random() * Math.PI);
 
 	var mat = new THREE.MeshPhongMaterial({
 		color:0x666666,
@@ -358,7 +359,7 @@ Player = function(color, enemy){
 	this.mesh.add(helmet);
 
 	if (enemy){
-		
+
 	}
 
 	this.mesh.receiveShadow = true;
