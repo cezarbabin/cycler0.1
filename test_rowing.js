@@ -66,7 +66,7 @@ function createScene() {
 		);
 	
 	// Set the position of the camera
-	camera.position.z = 200;
+	camera.position.z = 20;
   camera.position.y = 50;
   camera.rotation.x = -30 * Math.PI / 180;
 	
@@ -156,7 +156,7 @@ Road = function(color, width){
 	//this.mesh = new THREE.Object3D();
 	
 	// create geometry
-	var geom = new THREE.BoxGeometry(width,1,590,40,10);
+	var geom = new THREE.BoxGeometry(width,1,600,40,10);
 
 	//this.waves = [];
 
@@ -227,6 +227,47 @@ Obstacle = function(width){
 
 }
 
+Mountain = function(width){
+	var singleGeometry = new THREE.Geometry();
+	var geom = new THREE.DodecahedronGeometry(300,Math.random()*3 | 0);
+
+	var mat = new THREE.MeshPhongMaterial({
+		color:0x666666,
+		transparent:true,
+		opacity:1,
+		shading:THREE.FlatShading,
+	});
+
+	for (var i = 0; i < 5; i++) {
+		//var mesh = new THREE.Mesh(geom);
+		var mesh = new THREE.Mesh(geom);
+
+
+		var rnd = Math.random();
+		if (rnd > 0.5) {
+			mesh.position.x = width/2 + 150;
+		}
+		else {
+			mesh.position.x = -width/2 - 150;
+		}
+		
+
+		mesh.position.z = Math.random() * 590;
+		//mesh.position.z = 100;
+		
+		//mesh.position.x = -80;
+		mesh.position.y = -60;
+
+		mesh.updateMatrix();
+
+		singleGeometry.merge(mesh.geometry, mesh.matrix);
+	}
+	this.mesh = new THREE.Mesh(singleGeometry, mat);
+
+
+
+}
+
 function posNeg(){
 	var n = Math.random();
 	if (n > 0.5) {
@@ -239,6 +280,7 @@ function posNeg(){
 // Instantiate the road and add it to the scene:
 var roadArray = [];
 var obstArray = [];
+var mountainArray = [];
 function createRoad(){
 
 	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
@@ -246,18 +288,22 @@ function createRoad(){
 	for (var i = 0; i < 5; i++) {
 		var temp = new Road(Colors.blue, 800);
 		var tempObstacle = new Obstacle(800);
+		var mountain = new Mountain(800);
 		
 
 		// push it a little bit at the bottom of the scene
 		temp.mesh.position.z = -600 * i;
 		tempObstacle.mesh.position.z = -600 * i;
+		mountain.mesh.position.z = -600 * i;
 
 		roadArray.push(temp);
 		obstArray.push(tempObstacle);
+		mountainArray.push(mountain);
 
 		// add the mesh of the road to the scene
 		scene.add(temp.mesh);
 		scene.add(tempObstacle.mesh);
+		scene.add(mountain.mesh);
 		
 
 	}
@@ -336,6 +382,7 @@ function createPlayer(){
 	player = new Player();
 	player.mesh.position.y = 10;
 	player.mesh.position.z = 180;
+	player.mesh.add(camera);
 	scene.add(player.mesh);
 }
 
@@ -437,16 +484,21 @@ var k = 0;
 function loop(){
 	stats.update();
 	//player.updateHairs();
+	console.log(mountainArray);
+	console.log(obstArray);
 
 	updateKeyboard();
 	for (var i = 0; i < 5; i++) {
 		roadArray[i].mesh.position.z += speed;
 		obstArray[i].mesh.position.z += speed;
-		if (roadArray[0].mesh.position.z > 580){
+		mountainArray[i].mesh.position.z += speed;
+		if (roadArray[0].mesh.position.z > 600){
 			disposeOfRoadOptimized(roadArray[0]);
 			disposeOfRoadOptimized(obstArray[0]);
+			disposeOfRoadOptimized(mountainArray[0]);
 			roadArray.shift();
 			obstArray.shift();
+			mountainArray.shift();
 			addAnother();
 			k++; 
 		}
@@ -521,20 +573,24 @@ function addAnother() {
 
 	var colors = [Colors.blue, Colors.red];
 
-	var temp = new Road(Colors.blue, 200);
-	var tempObst = new Obstacle(200);
+	var temp = new Road(Colors.blue, 600);
+	var tempObst = new Obstacle(600);
+	var tempMountain = new Mountain(600);
 
 	// push it a little bit at the bottom of the scene
 	console.log(k);
 
-	temp.mesh.position.z = -580 * 4;
-	tempObst.mesh.position.z = -580 * 4;
+	temp.mesh.position.z = -590 * 4;
+	tempObst.mesh.position.z = -590 * 4;
+	tempMountain.mesh.position.z = -590 * 4;
 	
 	scene.add(temp.mesh);
 	scene.add(tempObst.mesh);
+	scene.add(tempMountain.mesh);
 
 	roadArray.push(temp);
 	obstArray.push(tempObst);
+	mountainArray.push(tempMountain);
 
 
 	// add the mesh of the road to the scene
