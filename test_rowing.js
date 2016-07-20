@@ -157,14 +157,31 @@ Road = function(color, width){
 	
 	// create geometry
 	var geom = new THREE.BoxGeometry(width,1,590,40,10);
-	
-	// create the material 
+
+	//this.waves = [];
+
 	var mat = new THREE.MeshPhongMaterial({
 		color:color,
 		transparent:true,
 		opacity:1,
 		shading:THREE.FlatShading,
 	});
+
+	for (var i = 0; i < 590; i+=30){
+		var rnd = Math.random();
+
+		if (rnd > 0.5) {
+			var geometry = new THREE.CylinderGeometry( Math.random() * 20, Math.random() * 20, width, 5 );
+			geometry.translate(0, 0, i);
+			geometry.rotateZ(-90 * Math.PI / 180);
+			THREE.GeometryUtils.merge(geom, geometry);
+		}
+
+
+	}
+	
+	// create the material 
+	
 
 	var base = new THREE.Mesh(geom, mat);
 	this.mesh = base;
@@ -179,7 +196,9 @@ Obstacle = function(width){
 	// Generate obstacles randomly
 
 	var singleGeometry = new THREE.Geometry();
-	var geom = new THREE.BoxGeometry(20,20,20,40,10);
+	var geom = new THREE.IcosahedronGeometry(20,Math.random()*3 | 0);
+
+	geom.translate(0, -20, 0);
 
 	var mat = new THREE.MeshPhongMaterial({
 			color:Colors.white,
@@ -225,7 +244,7 @@ function createRoad(){
 	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
 
 	for (var i = 0; i < 5; i++) {
-		var temp = new Road(colors[i], 800);
+		var temp = new Road(Colors.blue, 800);
 		var tempObstacle = new Obstacle(800);
 		
 
@@ -272,56 +291,26 @@ Player = function(){
 
 
 	// Body of the pilot
-	var bodyGeom = new THREE.BoxGeometry(5,5,5);
+	var bodyGeom = new THREE.BoxGeometry(5,5,2);
 	var bodyMat = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
 	bodyGeom.translate(0, 10, 0);
 	var body = new THREE.Mesh(bodyGeom, bodyMat);
 	this.mesh.add(body);
 
 	// Face of the pilot
-	var faceGeom = new THREE.BoxGeometry(10,10,10);
+	var faceGeom = new THREE.BoxGeometry(8,8,8);
 	var faceMat = new THREE.MeshLambertMaterial({color:Colors.white});
 	var face = new THREE.Mesh(faceGeom, faceMat);
+	faceGeom.translate(0, 3, 0);
 	this.mesh.add(face);
 
-	// Hair element
-	var hairGeom = new THREE.BoxGeometry(4,4,4);
-	var hairMat = new THREE.MeshLambertMaterial({color:Colors.pink});
-	var hair = new THREE.Mesh(hairGeom, hairMat);
-	hairGeom.translate(0, 15, 0);
+	var helmetGeom = new THREE.SphereGeometry(3, 20, 20);
+	var helmetMat = new THREE.MeshLambertMaterial({color:0x00FF7F});
+	var helmet = new THREE.Mesh(helmetGeom, helmetMat);
+	helmetGeom.translate(0, 12, 1);
+	this.mesh.add(helmet);
+
 	
-	// create a container for the hair
-	var hairs = new THREE.Object3D();
-
-	// create a container for the hairs at the top 
-	// of the head (the ones that will be animated)
-	this.hairsTop = new THREE.Object3D();
-
-	// create the hairs at the top of the head 
-	// and position them on a 3 x 4 grid
-	for (var i=0; i<12; i++){
-		var h = hair.clone();
-		var col = i%3;
-		var row = Math.floor(i/3);
-		var startPosZ = -0.5;
-		var startPosX = -0.5;
-		h.position.set(startPosX + row*0.5, 0, startPosZ + col*0.5);
-		h.scale.y = .75 + Math.random()*.25;
-		this.hairsTop.add(h);
-	}
-	hairs.add(this.hairsTop);
-
-	// create the hairs at the side of the face
-	var hairSideGeom = new THREE.BoxGeometry(3,1,0.5);
-
-	// create the hairs at the back of the head
-	var hairBackGeom = new THREE.BoxGeometry(0.5,1,2);
-	var hairBack = new THREE.Mesh(hairBackGeom, hairMat);
-	//hairBack.position.set(-0.0,-1,0)
-	hairs.add(hairBack);
-	hairs.position.set(-0.25,0.25,0);
-
-	this.mesh.add(hairs);
 
 	this.mesh.receiveShadow = true;
 }
@@ -453,7 +442,7 @@ function loop(){
 	for (var i = 0; i < 5; i++) {
 		roadArray[i].mesh.position.z += speed;
 		obstArray[i].mesh.position.z += speed;
-		if (roadArray[0].mesh.position.z > 600){
+		if (roadArray[0].mesh.position.z > 580){
 			disposeOfRoadOptimized(roadArray[0]);
 			disposeOfRoadOptimized(obstArray[0]);
 			roadArray.shift();
@@ -532,14 +521,14 @@ function addAnother() {
 
 	var colors = [Colors.blue, Colors.red];
 
-	var temp = new Road(colors[k%2], 200);
+	var temp = new Road(Colors.blue, 200);
 	var tempObst = new Obstacle(200);
 
 	// push it a little bit at the bottom of the scene
 	console.log(k);
 
-	temp.mesh.position.z = -600 * 4;
-	tempObst.mesh.position.z = -600 * 4;
+	temp.mesh.position.z = -580 * 4;
+	tempObst.mesh.position.z = -580 * 4;
 	
 	scene.add(temp.mesh);
 	scene.add(tempObst.mesh);
