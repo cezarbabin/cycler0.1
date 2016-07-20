@@ -22,7 +22,7 @@ var Colors = {
 function init() {
 	createScene();
 	createLights();
-	createRoad();
+	//createRoad();
 	createPlayer();
 	createH();
 	setXInitialPosition();
@@ -35,20 +35,24 @@ function setXInitialPosition(){
 }
 
 function createH(){
-	points =  [new THREE.Vector3(177.6076794686664, -189.59719456131666, 128.8401263489414),
-    new THREE.Vector3(-71.23931862284905, -153.9368085070406, 5.284478503819692),
-    new THREE.Vector3(-300.12290112941974, -144.47085896766586, 84.18142304788832),
-    new THREE.Vector3(-284.73829876413123, -158.77686893740247, -433.4249196789108),
-    new THREE.Vector3(-16.913449190888514, -153.90042496472668, -463.34498312188373),
-    new THREE.Vector3(551.6592551464272, -160.4979520898124, -620.8820906330495),
-    new THREE.Vector3(506.0060755889224, -169.487941154214, -23.248918892483424),
-    new THREE.Vector3(265.2380528628295, -165.47463489939983, 179.8685250961414)];
-    
+ points =  [new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(100, 0, 75),
+  new THREE.Vector3(0, 0, 150),
+  new THREE.Vector3(50, 0, 225),
+  new THREE.Vector3(0, 0, 300),
+  new THREE.Vector3(100, 0, 375),
+  new THREE.Vector3(0, 0, 450),
+  new THREE.Vector3(50, 0, 525),
+new THREE.Vector3(0, 0, 600),
+new THREE.Vector3(100, 0, 675),
+new THREE.Vector3(0, 0, 750)
+  ];
+
   for (var i = 0; i < points.length; i++){
       var axis = new THREE.Vector3( 1, 0, 0 );
       var angle = Math.PI / 2;
       points[i].applyAxisAngle( axis, angle );
-      points[i].multiplyScalar(100); 
+      points[i].multiplyScalar(30); 
   }
   spline = new THREE.SplineCurve3(points);
 
@@ -62,7 +66,8 @@ function createH(){
   var squareShape = new THREE.Shape();
   squareShape.moveTo( 0,0 );
   squareShape.lineTo( 0,sqLength);
-  squareShape.lineTo( 1,sqLength);
+  squareShape.lineTo( 20,sqLength);
+  squareShape.lineTo( 1,0);
   squareShape.lineTo( 1,sqLength*9);
   squareShape.lineTo( 0,sqLength*9);
   squareShape.lineTo( 0, sqLength *10 );
@@ -70,7 +75,20 @@ function createH(){
   squareShape.lineTo( 1, 0 );
   squareShape.lineTo( 0, 0 );
   var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
-  var material = new THREE.MeshLambertMaterial( { color: Colors.blue, wireframe: false } );
+  var material = new THREE.MeshLambertMaterial( { color: 0x8A2BE2, wireframe: false } );
+
+  var vertices = geometry.vertices;
+
+
+  var pyramid = new THREE.OctahedronGeometry(500, 0);
+
+  var pyramidMesh = new THREE.Mesh(pyramid, material);
+  scene.add(pyramidMesh);
+
+  var anotherShape = new THREE.Shape();
+  //var corn = new THREE.SHAPE()
+
+//  var bbox = new THREE.Box3().setFromObject(obj);
 
   var splinePoints = spline.getPoints(10000);
 
@@ -199,71 +217,22 @@ function createScene() {
 
 var hemisphereLight, shadowLight;
 function createLights() {
-	// A hemisphere light is a gradient colored light; 
-	// the first parameter is the sky color, the second parameter is the ground color, 
-	// the third parameter is the intensity of the light
 	hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
-	
-	// A directional light shines from a specific direction. 
-	// It acts like the sun, that means that all the rays produced are parallel. 
 	shadowLight = new THREE.DirectionalLight(0xffffff, .9);
-
-	// Set the direction of the light  
 	shadowLight.position.set(150, 350, 350);
-	
-	// Allow shadow casting 
 	shadowLight.castShadow = true;
-
-	// define the visible area of the projected shadow
 	shadowLight.shadow.camera.left = -400;
 	shadowLight.shadow.camera.right = 400;
 	shadowLight.shadow.camera.top = 400;
 	shadowLight.shadow.camera.bottom = -400;
 	shadowLight.shadow.camera.near = 1;
 	shadowLight.shadow.camera.far = 1000;
-
-	// define the resolution of the shadow; the higher the better, 
-	// but also the more expensive and less performant
 	shadowLight.shadow.mapSize.width = 2048;
 	shadowLight.shadow.mapSize.height = 2048;
-	
-	// to activate the lights, just add them to the scene
 	scene.add(hemisphereLight);  
 	scene.add(shadowLight);
 }
 
-var randomPoints2 = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 476.773194135871),
-	new THREE.Vector3(-225.4891213071726, 178.8107531261258, 285.3094285584699),
-	new THREE.Vector3(-632.6720101292041, 239.72799271191008, 80.6955646173692),
-	new THREE.Vector3(-878.2864580990286, 456.8855411916313, -632.9582192820432),
-	new THREE.Vector3(-303.8032494241374, 560.7781987719341, -314.6171915891019),
-	new THREE.Vector3(-542.9538873114697, 792.558268986469, -129.9714803216823),
-	new THREE.Vector3(-413.6004915238309, 874.0640096754225, -26.57707111030811),
-	new THREE.Vector3(-173.59237648970083, 951.0395135489118, -286.9272193873354),
-	new THREE.Vector3(-578.7684355599442, 1068.451029475109, -345.5103110288372),
-	new THREE.Vector3(-279.1934885064545, 1058.6396179616245, 9.419939608452523)];
-
-var randomPoints = [new THREE.Vector3(-323.0550147134401, 10, 476.773194135871),
-	new THREE.Vector3(-225.4891213071726, 10, 285.3094285584699),
-	new THREE.Vector3(-632.6720101292041, 10, 80.6955646173692),
-	new THREE.Vector3(-878.2864580990286, 10, -632.9582192820432),
-	new THREE.Vector3(-303.8032494241374, 10, -314.6171915891019),
-	new THREE.Vector3(-542.9538873114697, 10, -129.9714803216823),
-	new THREE.Vector3(-413.6004915238309, 10, -26.57707111030811),
-	new THREE.Vector3(-173.59237648970083, 10, -286.9272193873354),
-	new THREE.Vector3(-578.7684355599442, 10, -345.5103110288372),
-	new THREE.Vector3(-279.1934885064545, 10, 9.419939608452523)];
-
-var randomPoints3 = [new THREE.Vector3(-323.0550147134401, 88.41256695348932, 10),
-	new THREE.Vector3(-225.4891213071726, 178.8107531261258, 10),
-	new THREE.Vector3(-632.6720101292041, 239.72799271191008, 10),
-	new THREE.Vector3(-878.2864580990286, 456.8855411916313, 10),
-	new THREE.Vector3(-303.8032494241374, 560.7781987719341, 10),
-	new THREE.Vector3(-542.9538873114697, 792.558268986469, 10),
-	new THREE.Vector3(-413.6004915238309, 874.0640096754225, 10),
-	new THREE.Vector3(-173.59237648970083, 951.0395135489118, 10),
-	new THREE.Vector3(-578.7684355599442, 1068.451029475109, 10),
-	new THREE.Vector3(-279.1934885064545, 1058.6396179616245, 10)];
 
 Road = function(color, width){
 
@@ -389,7 +358,7 @@ function render() {
     	player.mesh.translateZ(Math.cos(radians) * 20);
     }
         
-    t = (t >= 1) ? 0 : t += 0.0001;
+    t = (t >= 1) ? 0 : t += 0.001;
 
     renderer.render(scene, camera); 
 }
