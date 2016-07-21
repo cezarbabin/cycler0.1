@@ -88,7 +88,9 @@ function createScene() {
 	// Define the size of the renderer; in this case,
 	// it will fill the entire screen
 	//renderer.setSize(WIDTH, HEIGHT);
-	renderer.setSize( 320, 568);
+	var mobileWidth = 640 * window.devicePixelRatio;
+	var mobileHeight = 1136 * window.devicePixelRatio;
+	renderer.setSize( mobileWidth, mobileHeight);
 	
 	// Enable shadow rendering
 	renderer.shadowMap.enabled = true;
