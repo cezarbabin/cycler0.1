@@ -88,7 +88,7 @@ function createScene() {
 	// Define the size of the renderer; in this case,
 	// it will fill the entire screen
 	//renderer.setSize(WIDTH, HEIGHT);
-	renderer.setSize( 1024, 768);
+	renderer.setSize( 320, 568);
 	
 	// Enable shadow rendering
 	renderer.shadowMap.enabled = true;
