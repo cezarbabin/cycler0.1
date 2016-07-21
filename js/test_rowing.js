@@ -87,6 +87,7 @@ function createScene() {
 
 	// Define the size of the renderer; in this case,
 	// it will fill the entire screen
+	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize(WIDTH, HEIGHT);
 	//var mobileWidth = 640 * window.devicePixelRatio;
 	//var mobileHeight = 1136 * window.devicePixelRatio;

@@ -78,7 +78,7 @@ function createScene() {
 
 		// Activate the anti-aliasing; this is less performant,
 		// but, as our project is low-poly based, it should be fine :)
-		antialias: true 
+		antialias: false;
 	});
 
 	// Define the size of the renderer; in this case,
