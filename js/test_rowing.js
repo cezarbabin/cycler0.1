@@ -28,6 +28,9 @@ function init() {
 	// add the lights
 	createLights();
 
+	var c =document.getElementById('resolution');
+	makeHighRes(c);
+
 	// add the objects
 	//createPlane();
 	createRoad();
@@ -606,4 +609,32 @@ function addAnother() {
 
 
 	// add the mesh of the road to the scene
+}
+
+function makeHighRes(c) {
+    console.log(c.id);
+    var ctx = c.getContext('2d');
+    // finally query the various pixel ratios
+    var devicePixelRatio = window.devicePixelRatio || 1;
+    var backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
+        ctx.mozBackingStorePixelRatio ||
+        ctx.msBackingStorePixelRatio ||
+        ctx.oBackingStorePixelRatio ||
+        ctx.backingStorePixelRatio || 1;
+    var ratio = devicePixelRatio / backingStoreRatio;
+    var world = document.getElementById('world');
+    // upscale canvas if the two ratios don't match
+    if (devicePixelRatio !== backingStoreRatio) {
+    
+        var oldWidth = world.width;
+        var oldHeight = world.height;
+        world.width = Math.round(oldWidth * ratio);
+        world.height = Math.round(oldHeight * ratio);
+        world.style.width = oldWidth + 'px';
+        world.style.height = oldHeight + 'px';
+        // now scale the context to counter
+        // the fact that we've manually scaled
+        // our canvas element
+        renderer.setSize(world.width, world.height);
+    }
 }
