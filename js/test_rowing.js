@@ -82,15 +82,15 @@ function createScene() {
 
 		// Activate the anti-aliasing; this is less performant,
 		// but, as our project is low-poly based, it should be fine :)
-		antialias: false
+		antialias: true
 	});
 
 	// Define the size of the renderer; in this case,
 	// it will fill the entire screen
-	//renderer.setSize(WIDTH, HEIGHT);
-	var mobileWidth = 640 * window.devicePixelRatio;
-	var mobileHeight = 1136 * window.devicePixelRatio;
-	renderer.setSize( mobileWidth, mobileHeight);
+	renderer.setSize(WIDTH, HEIGHT);
+	//var mobileWidth = 640 * window.devicePixelRatio;
+	//var mobileHeight = 1136 * window.devicePixelRatio;
+	//renderer.setSize( mobileWidth, mobileHeight);
 	
 	// Enable shadow rendering
 	renderer.shadowMap.enabled = true;
