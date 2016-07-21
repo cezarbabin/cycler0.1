@@ -1,8 +1,0 @@
-Issues:
-
-1. Definitely doing garbage collection the wrong way.
-2. Need to make speed independent of the fps.
-3. Need to make testing easier. 
-
-
-dashboard with collisions 
