@@ -29,7 +29,7 @@ function init() {
 	createLights();
 
 	var c =document.getElementById('resolution');
-	makeHighRes(c);
+	//makeHighRes(c);
 
 	// add the objects
 	//createPlane();
