@@ -59,7 +59,7 @@ var TERRAINGEN =
 	 */
 	CreateFaces: function( inGeometry, inWidth, inHeight )
 	{
-		var indices = inGeometry.getAttribute( 'index' ).array;
+		var indices = inGeometry.index.array;
 		var id = 0;
 		
 		for( var y = 0; y < inHeight - 1; ++y )
@@ -128,7 +128,7 @@ var TERRAINGEN =
 	
 		// Update the geometry
 		geometry.attributes.color.needsUpdate = true;
-		geometry.attributes.index.needsUpdate = true;
+		geometry.index.needsUpdate = true;
 		geometry.attributes.position.needsUpdate = true;
 
 		return geometry;
