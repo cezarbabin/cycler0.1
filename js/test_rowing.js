@@ -529,7 +529,7 @@ function loop(){
 	// call the loop function again
 	requestAnimationFrame(loop);
 
-	$('#pb').attr('aria-valuenow', speed*10);
+	
 }
 
 function disposeOfRoad(el){
@@ -586,6 +586,7 @@ function updateKeyboard(){
 		mesh.material.color = new THREE.Color(0x0000ff);
 	if ( keyboard.down("S") )
 		speed += 5;
+		$('#pb').attr('aria-valuenow', speed*10);
 	if ( keyboard.up("S") )
 		speed = 3;
 }
