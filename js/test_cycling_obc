@@ -92,7 +92,6 @@ function createH(){
 
   var splinePoints = spline.getPoints(1000);
 
-	//
 	/*
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
@@ -123,13 +122,14 @@ function createH(){
 
 		scene.add(newMesh);
 	}
-	*/
+     */
 
 	var splinePoints = spline.getPoints(10000);
 
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
+    /*
   for (var j = 0; j < 10000; j += 100){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
@@ -166,7 +166,7 @@ function createH(){
     var rnd =  Math.random() * 100;
 		newMesh.translateX( - rnd - 50);
   }
-
+*/
   var meshSpline = new THREE.Mesh( geometry, material );
 
   var material = new THREE.LineBasicMaterial({
@@ -374,6 +374,9 @@ function render() {
     }
         
     t = (t >= 1) ? 0 : t += 0.0004;
+    
+    if (t>0.001 && head == "initialized")
+        doStart();
 
     renderer.render(scene, camera); 
 }
@@ -386,6 +389,11 @@ function update(radians)
 		mesh.translateX( -50 );
 	if ( keyboard.down("right") ) 
 		mesh.translateX(  50 );
+    if ( head == "left")
+        console.log("ALRIGHT");
+        player.mesh.translateX( -moveDistance );
+    if ( head == "right")
+        player.mesh.translateX( moveDistance );
 	if ( keyboard.pressed("A") ) {
 		console.log('hi');
 		player.mesh.translateX( -moveDistance );

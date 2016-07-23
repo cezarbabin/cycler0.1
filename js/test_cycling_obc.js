@@ -1,3 +1,25 @@
+ var head = "initialized";
+             
+             function doStart() {
+                CustomPlugin.start( successCallback );
+                var head = "center";
+             }
+             
+             function setHead(position){
+                 head = position;
+                 
+             }
+             
+             function successCallback() {
+                 //document.getElementById( "status" ).innerHTML = "started";
+             }
+             
+             function updateContent( data ) {
+             
+             //document.getElementById( "output" ).innerHTML = data;
+             }
+
+
 var scene,
 		camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 		renderer, container, clock;
@@ -92,7 +114,6 @@ function createH(){
 
   var splinePoints = spline.getPoints(1000);
 
-	//
 	/*
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
@@ -123,13 +144,14 @@ function createH(){
 
 		scene.add(newMesh);
 	}
-	*/
+     */
 
 	var splinePoints = spline.getPoints(10000);
 
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
+    /*
   for (var j = 0; j < 10000; j += 100){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
@@ -166,7 +188,7 @@ function createH(){
     var rnd =  Math.random() * 100;
 		newMesh.translateX( - rnd - 50);
   }
-
+*/
   var meshSpline = new THREE.Mesh( geometry, material );
 
   var material = new THREE.LineBasicMaterial({
@@ -374,6 +396,9 @@ function render() {
     }
         
     t = (t >= 1) ? 0 : t += 0.0004;
+    
+    //if (t>0.001 && head == "initialized")
+        //doStart();
 
     renderer.render(scene, camera); 
 }
@@ -382,20 +407,18 @@ function update(radians)
 {
 	keyboard.update();
 	var moveDistance = 50 * clock.getDelta(); 
-	if ( keyboard.down("left") ) 
-		mesh.translateX( -50 );
-	if ( keyboard.down("right") ) 
-		mesh.translateX(  50 );
+
+  if ( head == "left") {
+  	player.mesh.translateX( -moveDistance );
+  }
+  if ( head == "right") {
+    player.mesh.translateX( moveDistance );
+  }
 	if ( keyboard.pressed("A") ) {
-		console.log('hi');
 		player.mesh.translateX( -moveDistance );
 	}	
 	if ( keyboard.pressed("D") )
 		player.mesh.translateX(  moveDistance );
-	if ( keyboard.down("R") )
-		mesh.material.color = new THREE.Color(0xff0000);
-	if ( keyboard.up("R") )
-		mesh.material.color = new THREE.Color(0x0000ff);
 }
 
 

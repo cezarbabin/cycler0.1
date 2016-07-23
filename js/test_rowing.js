@@ -528,6 +528,8 @@ function loop(){
 
 	// call the loop function again
 	requestAnimationFrame(loop);
+
+	$('#pb').attr('aria-valuenow', speed*10);
 }
 
 function disposeOfRoad(el){
