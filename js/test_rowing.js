@@ -175,6 +175,7 @@ Road = function(color, width){
 		shading:THREE.FlatShading,
 	});
 
+/*
 	for (var i = 0; i < 590; i+=30){
 		var rnd = Math.random();
 
@@ -187,12 +188,15 @@ Road = function(color, width){
 
 
 	}
+	*/
 	
 	// create the material 
 	
 
 	var base = new THREE.Mesh(geom, mat);
-	this.mesh = base;
+	//this.mesh = base;
+
+	this.mesh = MAKETERRAIN.WithParams('gey')
 
 	//generateObstacles(this.mesh, width);
 

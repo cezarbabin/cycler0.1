@@ -10,10 +10,10 @@ var MOUNTAINS2_COLORS =
 		
 		var gradient = context.createLinearGradient( 0, 0, 255, 0 );
 		
-		gradient.addColorStop( 0.5, '#8EE5EE' );
-		gradient.addColorStop( 0.1, '#0099ff' );
-		gradient.addColorStop( 0.2, '#D3FFCE' );
-		//gradient.addColorStop( 0.6, '#336699' );
+		gradient.addColorStop( 0.5, '#0076A3' );
+		gradient.addColorStop( 0.1, '#3BB9FF' );
+		//gradient.addColorStop( 0.2, '#D3FFCE' );
+		gradient.addColorStop( 0.6, '#336699' );
 		gradient.addColorStop( 0.8, '#3BB9FF' );
 		
 		context.fillStyle = gradient;

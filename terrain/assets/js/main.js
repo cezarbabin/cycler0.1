@@ -4,7 +4,7 @@ var MAKETERRAIN = {
 			alea: RAND_MT,
 			generator: PN_GENERATOR,
 			width: 500,
-			height: 500,
+			height: 700,
 			widthSegments: 30,
 			heightSegments: 30,
 			depth: 30,
