@@ -113,33 +113,18 @@ function createH(){
       points[i].applyAxisAngle( axis, angle );
       points[i].multiplyScalar(30); 
   }
+
   spline = new THREE.SplineCurve3(points);
+  //spline2 = new THREE.SplineCurve3(points.slice(0, 3));
+  //spline3 = new THREE.SplineCurve3(points.slice(3, 5));
 
-  var splineObject = new THREE.Line( geometry, material );
-  var extrudeSettings = {
-                      steps           : 1000,
-                      bevelEnabled    : false,
-                      extrudePath     : spline
-                  };
   var sqLength = 20;
-  var squareShape = new THREE.Shape();
-  squareShape.moveTo( 0,0 );
-  squareShape.lineTo( -20,sqLength);
-  squareShape.lineTo( 0,sqLength);
-  
-  squareShape.lineTo( 1,0);
-  squareShape.lineTo( 1,sqLength*9);
-  squareShape.lineTo( 0,sqLength*9);
 
-  squareShape.lineTo( -20,sqLength*9);
-  squareShape.lineTo( 0, sqLength *11 );
 
-  var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
-  var material = new THREE.MeshLambertMaterial( { color: 0xdddddd, wireframe: false } );
-  var meshSpline = new THREE.Mesh( geometry, material );
+  //createCurvePath( Colors.brown, spline, 500, sqLength, 0.25);
+  createCurvePath( Colors.white, spline, 500, sqLength, 1);
 
   var splinePoints = spline.getPoints(1000);
-
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
   	if (typeof(splinePoints[j]) == 'undefined') {
@@ -170,9 +155,7 @@ function createH(){
 		scene.add(newMesh);
 	}
 
-
-
-// PARTICLES AND COINS
+	// PARTICLES AND COINS
 	for (var i=0; i<10; i++){
     var particle = new Particle();
     particlesPool.push(particle);
@@ -217,8 +200,44 @@ function createH(){
 
 
   }
+}
 
+function createCurvePath(color, spline, steps, sqLength, percentage, first){
+
+	if (first){
+		spline = new THREE.SplineCurve3(spline.points.slice(spline.points.length * first, spline.points.length * percentage | 0));
+	} else {
+		spline = new THREE.SplineCurve3(spline.points.slice(0, spline.points.length * percentage | 0));
+	}
+	
+	var extrudeSettings = {
+    steps           : 1000,
+    bevelEnabled    : false,
+    extrudePath     : spline
+	};
+
+	
+	var squareShape = createSquare(sqLength);
+  var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
+  var material = new THREE.MeshLambertMaterial( { color: color, wireframe: false } );
+  meshSpline = new THREE.Mesh( geometry, material );
   scene.add( meshSpline );
+
+}
+
+function createSquare(sqLength){
+  var squareShape = new THREE.Shape();
+  squareShape.moveTo( 0,0 );
+  squareShape.lineTo( -20,sqLength);
+  squareShape.lineTo( 0,sqLength);
+  
+  squareShape.lineTo( 1,0);
+  squareShape.lineTo( 1,sqLength*9);
+  squareShape.lineTo( 0,sqLength*9);
+
+  squareShape.lineTo( -20,sqLength*9);
+  squareShape.lineTo( 0, sqLength *11 );
+  return squareShape;
 }
 
 var particlesPool = [];
@@ -244,8 +263,8 @@ Particle.prototype.explode = function(pos, color, scale){
   var targetX = pos.x + (-1 + Math.random()*2)*50;
   var targetY = pos.y + (-1 + Math.random()*2)*50;
   var speed = .6+Math.random()*.2;
-  console.log(pos);
-  console.log(player.position);
+  //console.log(pos);
+ // console.log(player.position);
   TweenMax.to(this.mesh.rotation, speed, {x:Math.random()*12, y:Math.random()*12});
   TweenMax.to(this.mesh.scale, speed, {x:.1, y:.1, z:.1});
   TweenMax.to(this.mesh.position, speed, {x:targetX, y:targetY, delay:Math.random() *.1, ease:Power2.easeOut, onComplete:function(){
@@ -489,6 +508,22 @@ function render() {
     }
 
     player.translateZ(10);
+
+
+		if (t  > 0.1 | t >  0.3 | t > 0.5){
+    	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.brown, wireframe: false } );
+    	meshSpline.material = newMaterial;
+    	meshSpline.material.needsUpdate = true;
+    	//speed = speed/2;
+    }
+    if (t > 0.2 | t > 0.4 ){
+    	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.white, wireframe: false } );
+    	meshSpline.material = newMaterial;
+    	meshSpline.material.needsUpdate = true;
+    	//speed = 0.0003;
+    }
+
+
         
     t = (t >= 1) ? 0 : t += speed;
 
