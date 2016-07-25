@@ -75,7 +75,7 @@ function createH(){
   squareShape.lineTo( 0, sqLength *11 );
 
   var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
-  var material = new THREE.MeshLambertMaterial( { color: 0x8A2BE2, wireframe: false } );
+  var material = new THREE.MeshLambertMaterial( { color: 0xdddddd, wireframe: false } );
 
   var vertices = geometry.vertices;
 
@@ -93,7 +93,7 @@ function createH(){
   var splinePoints = spline.getPoints(1000);
 
 	//
-	/*
+	
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
   	if (typeof(splinePoints[j]) == 'undefined') {
@@ -101,7 +101,7 @@ function createH(){
 		}
   	
 		var mat = new THREE.MeshPhongMaterial({
-			color:Colors.blue,
+			color:0x00FF7F,
 			transparent:true,
 			opacity:1,
 			shading:THREE.FlatShading,
@@ -123,18 +123,18 @@ function createH(){
 
 		scene.add(newMesh);
 	}
-	*/
+	
 
 	var splinePoints = spline.getPoints(10000);
 
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
-  for (var j = 0; j < 10000; j += 100){
+  for (var j = 0; j < 10000; j += 200){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
-  	var geom = new THREE.DodecahedronGeometry(20, 0 );
+  	var geom = new THREE.DodecahedronGeometry(10, 0 );
 
 		var mat = new THREE.MeshPhongMaterial({
 			color:Colors.red,
@@ -165,6 +165,8 @@ function createH(){
 
     var rnd =  Math.random() * 100;
 		newMesh.translateX( - rnd - 50);
+
+		newMesh.translateZ(10);
   }
 
   var meshSpline = new THREE.Mesh( geometry, material );
@@ -187,7 +189,7 @@ function createScene() {
 	scene = new THREE.Scene();
 	scene.fog = new THREE.Fog(0xcccccc, 100, 950);
 	aspectRatio = WIDTH / HEIGHT;
-	fieldOfView = 120;
+	fieldOfView = 320;
 	nearPlane = 1;
 	farPlane = 20000;
 	
@@ -245,6 +247,9 @@ function createLights() {
 	shadowLight.shadow.mapSize.height = 2048;
 	scene.add(hemisphereLight);  
 	scene.add(shadowLight);
+
+	ambientLight = new THREE.AmbientLight(0x3BB9FF, .5);
+	scene.add(ambientLight);
 }
 
 // Making the road
