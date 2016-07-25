@@ -23,9 +23,69 @@ function init() {
 	createScene();
 	createLights();
 	createPlayer();
+	
+}
+
+Player2 = function() {
+	var manager = new THREE.LoadingManager();
+	manager.onProgress = function ( item, loaded, total ) {
+
+		console.log( item, loaded, total );
+
+	};
+
+	var loader = new THREE.OBJLoader( manager );
+	var mesh ;
+
+	
+	loader.load( 'tricycle.obj', function ( object) {
+		object.traverse( function ( child ) {
+			var bodyMat = new THREE.MeshPhongMaterial({color:Colors.pink, shading:THREE.FlatShading});
+			if ( child instanceof THREE.Mesh ) {
+				child.material = bodyMat;
+			}
+		} );
+		
+		set(object, true);
+		
+	} );
+
+	
+
+	//this.mesh = playerObj;
+}
+
+function set(object){
+	player = object;
+	player.position.y = 10;
+	player.position.z = 180;
+	player.add(camera);
+	scene.add(player);
 	createH();
 	setXInitialPosition();
 	animate();
+}
+
+// Making a player
+Player = function(){
+	var geom = new THREE.BoxGeometry(20,20,20,40,10);
+
+	var mat = new THREE.MeshPhongMaterial({
+		color:Colors.brown,
+		transparent:true,
+		opacity:1,
+		shading:THREE.FlatShading,
+	});
+
+	this.mesh = new THREE.Mesh(geom, mat);
+
+	// Allow the road to receive shadows
+	this.mesh.receiveShadow = true; 
+}
+var player;
+function createPlayer(){
+	player = new Player2();
+	
 }
 
 function setXInitialPosition(){
@@ -185,7 +245,7 @@ Particle.prototype.explode = function(pos, color, scale){
   var targetY = pos.y + (-1 + Math.random()*2)*50;
   var speed = .6+Math.random()*.2;
   console.log(pos);
-  console.log(player.mesh.position);
+  console.log(player.position);
   TweenMax.to(this.mesh.rotation, speed, {x:Math.random()*12, y:Math.random()*12});
   TweenMax.to(this.mesh.scale, speed, {x:.1, y:.1, z:.1});
   TweenMax.to(this.mesh.position, speed, {x:targetX, y:targetY, delay:Math.random() *.1, ease:Power2.easeOut, onComplete:function(){
@@ -275,7 +335,7 @@ CoinsHolder.prototype.rotateCoins = function(){
     if (coin.exploding) continue;
 
     //var globalCoinPosition =  coin.mesh.localToWorld(new THREE.Vector3());
-    var diffPos = player.mesh.position.clone().sub(coin.mesh.position.clone());
+    var diffPos = player.position.clone().sub(coin.mesh.position.clone());
     var d = diffPos.length();
     if (d<15){
       this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
@@ -363,31 +423,6 @@ function createLights() {
 	scene.add(ambientLight);
 }
 
-// Making a player
-Player = function(){
-	var geom = new THREE.BoxGeometry(20,20,20,40,10);
-
-	var mat = new THREE.MeshPhongMaterial({
-		color:Colors.brown,
-		transparent:true,
-		opacity:1,
-		shading:THREE.FlatShading,
-	});
-
-	this.mesh = new THREE.Mesh(geom, mat);
-
-	// Allow the road to receive shadows
-	this.mesh.receiveShadow = true; 
-}
-var player;
-function createPlayer(){
-	player = new Player();
-	player.mesh.position.y = 10;
-	player.mesh.position.z = 180;
-	player.mesh.add(camera);
-	scene.add(player.mesh);
-}
-
 // Animation stuff
 function animate() {
     requestAnimationFrame(animate);
@@ -426,8 +461,8 @@ function render() {
     
     // set the marker position
     pt = spline.getPoint( t );
-    player.mesh.position.set( pt.x, pt.y, pt.z);
-    player.mesh.translateX(xposition);
+    player.position.set( pt.x, pt.y, pt.z);
+    player.translateX(xposition);
     
     // get the tangent to the curve
     tangent = spline.getTangent( t ).normalize();
@@ -440,20 +475,20 @@ function render() {
     radians = Math.acos( up.dot( tangent ) );
         
     // set the quaternion
-    player.mesh.quaternion.setFromAxisAngle( axis, radians );
+    player.quaternion.setFromAxisAngle( axis, radians );
     
     radians = Math.asin(straight.dot(tangent));
-    player.mesh.rotation.x = radians * Math.PI / 180;
-    //player.mesh.quaternion.setFromAxisAngle( axis2, radians );
+    player.rotation.x = radians * Math.PI / 180;
+    //player.quaternion.setFromAxisAngle( axis2, radians );
 
     if (radians > 0) {
-    	//player.mesh.translateZ(Math.sin(radians) * 20);
+    	//player.translateZ(Math.sin(radians) * 20);
 
     } else  {
-    	//player.mesh.translateZ(Math.cos(radians) * 20);
+    	//player.translateZ(Math.cos(radians) * 20);
     }
 
-    player.mesh.translateZ(10);
+    player.translateZ(10);
         
     t = (t >= 1) ? 0 : t += speed;
 
@@ -470,11 +505,11 @@ function update(radians)
 		mesh.translateX(  50 );
 	if ( keyboard.pressed("A") ) {
 		console.log('hi');
-		player.mesh.translateX( -moveDistance );
+		player.translateX( -moveDistance );
 	}	
 	
 	if ( keyboard.pressed("D") )
-		player.mesh.translateX(  moveDistance );
+		player.translateX(  moveDistance );
 	if ( keyboard.down("R") )
 		mesh.material.color = new THREE.Color(0xff0000);
 	if ( keyboard.up("R") )
