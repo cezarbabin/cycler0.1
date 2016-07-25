@@ -20,6 +20,7 @@ var Colors = {
 };
 
 function init() {
+	$('#flashText').hide();
 	createScene();
 	createLights();
 	createPlayer();
@@ -401,11 +402,11 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	// framerate stats
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
+	//stats = new Stats();
+	//stats.domElement.style.position = 'absolute';
+	//stats.domElement.style.bottom = '0px';
+	//stats.domElement.style.zIndex = 100;
+	//container.appendChild( stats.domElement );
 	
 	// Listen to the screen: if the user resizes it
 	// we have to update the camera and the renderer size
@@ -510,17 +511,19 @@ function render() {
     player.translateZ(10);
 
 
-		if (t  > 0.1 | t >  0.3 | t > 0.5){
+		if (t  > 0.3 ){
     	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.brown, wireframe: false } );
     	meshSpline.material = newMaterial;
     	meshSpline.material.needsUpdate = true;
     	//speed = speed/2;
+    	$('#flashText').show();
     }
-    if (t > 0.2 | t > 0.4 ){
+    if (t > 0.5 ){
     	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.white, wireframe: false } );
     	meshSpline.material = newMaterial;
     	meshSpline.material.needsUpdate = true;
     	//speed = 0.0003;
+    	$('#flashText').hide();
     }
 
 
