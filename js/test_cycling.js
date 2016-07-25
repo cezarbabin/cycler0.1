@@ -290,6 +290,9 @@ CoinsHolder.prototype.rotateCoins = function(){
   }
 }
 
+var speed = 0.0003;
+
+
 
 function createScene() {
 	HEIGHT = window.innerHeight;
@@ -412,6 +415,14 @@ function render() {
     if ( keyboard.pressed("D") ) {
 			xposition = xposition+moveDistance ;
 		}
+		if ( keyboard.down("S") ) {
+			speed += 0.0003
+			$('#pb').attr('aria-valuenow', 80 );
+		}	
+		if ( keyboard.up("S") ) {
+			speed = 0.0003
+			$('#pb').attr('aria-valuenow', 20 );
+		}	
     
     // set the marker position
     pt = spline.getPoint( t );
@@ -444,7 +455,7 @@ function render() {
 
     player.mesh.translateZ(10);
         
-    t = (t >= 1) ? 0 : t += 0.0002;
+    t = (t >= 1) ? 0 : t += speed;
 
     renderer.render(scene, camera); 
 }
@@ -461,6 +472,7 @@ function update(radians)
 		console.log('hi');
 		player.mesh.translateX( -moveDistance );
 	}	
+	
 	if ( keyboard.pressed("D") )
 		player.mesh.translateX(  moveDistance );
 	if ( keyboard.down("R") )
