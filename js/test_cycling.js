@@ -113,13 +113,14 @@ function createH(){
 
 
 // PARTICLES AND COINS
-for (var i=0; i<10; i++){
+	for (var i=0; i<10; i++){
     var particle = new Particle();
     particlesPool.push(particle);
   }
   particlesHolder = new ParticlesHolder();
 	coinsHolder = new CoinsHolder(20);
   scene.add(coinsHolder.mesh)
+  scene.add(particlesHolder.mesh)
 
 	var splinePoints = spline.getPoints(10000);
   var up = new THREE.Vector3(0, 1, 0);
@@ -183,7 +184,8 @@ Particle.prototype.explode = function(pos, color, scale){
   var targetX = pos.x + (-1 + Math.random()*2)*50;
   var targetY = pos.y + (-1 + Math.random()*2)*50;
   var speed = .6+Math.random()*.2;
-  console.log('hei')
+  console.log(pos);
+  console.log(player.mesh.position);
   TweenMax.to(this.mesh.rotation, speed, {x:Math.random()*12, y:Math.random()*12});
   TweenMax.to(this.mesh.scale, speed, {x:.1, y:.1, z:.1});
   TweenMax.to(this.mesh.position, speed, {x:targetX, y:targetY, delay:Math.random() *.1, ease:Power2.easeOut, onComplete:function(){
@@ -213,7 +215,7 @@ ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
     var _this = this;
     particle.mesh.position.y = pos.y;
     particle.mesh.position.x = pos.x;
-    particle.mesh.position.z = pos.z;
+    //particle.mesh.position.z = pos.z;
     particle.explode(pos,color, scale);
   }
 }
@@ -221,7 +223,7 @@ ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
 Coin = function(){
   var geom = new THREE.TetrahedronGeometry(20,0);
   var mat = new THREE.MeshPhongMaterial({
-    color:0x009999,
+    color:Colors.red,
     shininess:0,
     specular:0xffffff,
 
@@ -275,10 +277,10 @@ CoinsHolder.prototype.rotateCoins = function(){
     //var globalCoinPosition =  coin.mesh.localToWorld(new THREE.Vector3());
     var diffPos = player.mesh.position.clone().sub(coin.mesh.position.clone());
     var d = diffPos.length();
-    if (d<10){
+    if (d<15){
       this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
       this.mesh.remove(coin.mesh);
-      particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, 0x009999, 20);
+      particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, Colors.red, 3);
       i--;
     }else if (coin.angle > Math.PI){
       this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
@@ -360,7 +362,7 @@ function createLights() {
 
 // Making a player
 Player = function(){
-	var geom = new THREE.BoxGeometry(10,10,10,40,10);
+	var geom = new THREE.BoxGeometry(20,20,20,40,10);
 
 	var mat = new THREE.MeshPhongMaterial({
 		color:Colors.brown,
@@ -434,13 +436,15 @@ function render() {
     //player.mesh.quaternion.setFromAxisAngle( axis2, radians );
 
     if (radians > 0) {
-    	player.mesh.translateZ(Math.sin(radians) * 20);
+    	//player.mesh.translateZ(Math.sin(radians) * 20);
 
     } else  {
-    	player.mesh.translateZ(Math.cos(radians) * 20);
+    	//player.mesh.translateZ(Math.cos(radians) * 20);
     }
+
+    player.mesh.translateZ(10);
         
-    t = (t >= 1) ? 0 : t += 0.0004;
+    t = (t >= 1) ? 0 : t += 0.0002;
 
     renderer.render(scene, camera); 
 }
