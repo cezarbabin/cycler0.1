@@ -76,24 +76,10 @@ function createH(){
 
   var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
   var material = new THREE.MeshLambertMaterial( { color: 0xdddddd, wireframe: false } );
-
-  var vertices = geometry.vertices;
-
-
-  var pyramid = new THREE.OctahedronGeometry(500, 0);
-
-  var pyramidMesh = new THREE.Mesh(pyramid, material);
-  pyramidMesh.x = 0;
-  pyramidMesh.y = 0;
-  pyramidMesh.z = 1000;
-  scene.add(pyramidMesh);
-
-  var anotherShape = new THREE.Shape();
+  var meshSpline = new THREE.Mesh( geometry, material );
 
   var splinePoints = spline.getPoints(1000);
 
-	//
-	
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
   	if (typeof(splinePoints[j]) == 'undefined') {
@@ -123,10 +109,19 @@ function createH(){
 
 		scene.add(newMesh);
 	}
-	
+
+
+
+// PARTICLES AND COINS
+for (var i=0; i<10; i++){
+    var particle = new Particle();
+    particlesPool.push(particle);
+  }
+  particlesHolder = new ParticlesHolder();
+	coinsHolder = new CoinsHolder(20);
+  scene.add(coinsHolder.mesh)
 
 	var splinePoints = spline.getPoints(10000);
-
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
@@ -135,53 +130,164 @@ function createH(){
   		break;
 		}
   	var geom = new THREE.DodecahedronGeometry(10, 0 );
-
 		var mat = new THREE.MeshPhongMaterial({
 			color:Colors.red,
 			transparent:true,
 			opacity:1,
 			shading:THREE.FlatShading,
 		});
-
 		var newMesh = new THREE.Mesh(geom, mat);
-
 		newMesh.receiveShadow = true; 
 
 		newMesh.position.set(splinePoints[j].x, splinePoints[j].y, splinePoints[j].z);
 
-		scene.add(newMesh);
+		//scene.add(newMesh);
 		
 		tangent = spline.getTangent( j/10000 ).normalize();
-    
-    // calculate the axis to rotate around
     axis.crossVectors( up, tangent ).normalize();
-
-    // calcluate the angle between the up vector and the tangent
     radians = Math.acos( up.dot( tangent ) ); 
-
     newMesh.quaternion.setFromAxisAngle( axis, radians );
-
     newMesh.rotation.x = Math.random()  * 3 * Math.PI / 180;
-
     var rnd =  Math.random() * 100;
 		newMesh.translateX( - rnd - 50);
-
 		newMesh.translateZ(10);
-  }
 
-  var meshSpline = new THREE.Mesh( geometry, material );
+		coinsHolder.spawnCoins(newMesh.position.x, newMesh.position.y, newMesh.position.z);
 
-  var material = new THREE.LineBasicMaterial({
-      color: 0xff00f0,
-  });
-  var geometry = new THREE.Geometry();
-  for(var i = 0; i < spline.getPoints(200).length; i++){
-      geometry.vertices.push(spline.getPoints(200)[i]);  
+
   }
-  var line = new THREE.Line(geometry, material);
 
   scene.add( meshSpline );
 }
+
+var particlesPool = [];
+var particlesInUse = [];
+
+Particle = function(){
+  var geom = new THREE.TetrahedronGeometry(3,0);
+  var mat = new THREE.MeshPhongMaterial({
+    color:0x009999,
+    shininess:0,
+    specular:0xffffff,
+    shading:THREE.FlatShading
+  });
+  this.mesh = new THREE.Mesh(geom,mat);
+}
+
+Particle.prototype.explode = function(pos, color, scale){
+  var _this = this;
+  var _p = this.mesh.parent;
+  this.mesh.material.color = new THREE.Color( color);
+  this.mesh.material.needsUpdate = true;
+  this.mesh.scale.set(scale, scale, scale);
+  var targetX = pos.x + (-1 + Math.random()*2)*50;
+  var targetY = pos.y + (-1 + Math.random()*2)*50;
+  var speed = .6+Math.random()*.2;
+  console.log('hei')
+  TweenMax.to(this.mesh.rotation, speed, {x:Math.random()*12, y:Math.random()*12});
+  TweenMax.to(this.mesh.scale, speed, {x:.1, y:.1, z:.1});
+  TweenMax.to(this.mesh.position, speed, {x:targetX, y:targetY, delay:Math.random() *.1, ease:Power2.easeOut, onComplete:function(){
+      if(_p) _p.remove(_this.mesh);
+      _this.mesh.scale.set(1,1,1);
+      particlesPool.unshift(_this);
+    }});
+}
+
+ParticlesHolder = function (){
+  this.mesh = new THREE.Object3D();
+  this.particlesInUse = [];
+}
+
+ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
+
+  var nPArticles = density;
+  for (var i=0; i<nPArticles; i++){
+    var particle;
+    if (particlesPool.length) {
+      particle = particlesPool.pop();
+    }else{
+      particle = new Particle();
+    }
+    this.mesh.add(particle.mesh);
+    particle.mesh.visible = true;
+    var _this = this;
+    particle.mesh.position.y = pos.y;
+    particle.mesh.position.x = pos.x;
+    particle.mesh.position.z = pos.z;
+    particle.explode(pos,color, scale);
+  }
+}
+
+Coin = function(){
+  var geom = new THREE.TetrahedronGeometry(20,0);
+  var mat = new THREE.MeshPhongMaterial({
+    color:0x009999,
+    shininess:0,
+    specular:0xffffff,
+
+    shading:THREE.FlatShading
+  });
+  this.mesh = new THREE.Mesh(geom,mat);
+  this.mesh.castShadow = true;
+  this.angle = 0;
+  this.dist = 0;
+}
+
+CoinsHolder = function (nCoins){
+  this.mesh = new THREE.Object3D();
+  this.coinsInUse = [];
+  this.coinsPool = [];
+  for (var i=0; i<nCoins; i++){
+    var coin = new Coin();
+    this.coinsPool.push(coin);
+  }
+}
+
+CoinsHolder.prototype.spawnCoins = function(x, y, z){
+
+  var nCoins = 1;// + Math.floor(Math.random()*10);
+  //var d = game.seaRadius + game.planeDefaultHeight + (-1 + Math.random() * 2) * (game.planeAmpHeight-20);
+  var amplitude = 10 + Math.round(Math.random()*10);
+  for (var i=0; i<nCoins; i++){
+    var coin;
+    if (this.coinsPool.length) {
+      coin = this.coinsPool.pop();
+    }else{
+      coin = new Coin();
+    }
+    this.mesh.add(coin.mesh);
+    this.coinsInUse.push(coin);
+    coin.angle = - (i*0.02);
+    coin.distance = 5 + Math.cos(i*.5)*amplitude;
+
+    coin.mesh.position.y = y;
+    coin.mesh.position.x = x;
+    coin.mesh.position.z = z;
+
+  }
+}
+
+CoinsHolder.prototype.rotateCoins = function(){
+  for (var i=0; i<this.coinsInUse.length; i++){
+    var coin = this.coinsInUse[i];
+    if (coin.exploding) continue;
+
+    //var globalCoinPosition =  coin.mesh.localToWorld(new THREE.Vector3());
+    var diffPos = player.mesh.position.clone().sub(coin.mesh.position.clone());
+    var d = diffPos.length();
+    if (d<10){
+      this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
+      this.mesh.remove(coin.mesh);
+      particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, 0x009999, 20);
+      i--;
+    }else if (coin.angle > Math.PI){
+      this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
+      this.mesh.remove(coin.mesh);
+      i--;
+    }
+  }
+}
+
 
 function createScene() {
 	HEIGHT = window.innerHeight;
@@ -194,8 +300,8 @@ function createScene() {
 	farPlane = 20000;
 	
 	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-  camera.position.z = 70;
-  camera.position.y = -65;
+  camera.position.z = 80;
+  camera.position.y = -125;
   camera.rotation.x = 60 * Math.PI / 180;
 
 	renderer = new THREE.WebGLRenderer({ 
@@ -252,56 +358,9 @@ function createLights() {
 	scene.add(ambientLight);
 }
 
-// Making the road
-Road = function(color, width){
-
-	// create container
-	//this.mesh = new THREE.Object3D();
-	
-	// create geometry
-	var geom = new THREE.BoxGeometry(width,1,590,40,10);
-	
-	// create the material 
-	var mat = new THREE.MeshPhongMaterial({
-		color:color,
-		transparent:true,
-		opacity:1,
-		shading:THREE.FlatShading,
-	});
-
-	var base = new THREE.Mesh(geom, mat);
-	this.mesh = base;
-
-	//generateObstacles(this.mesh, width);
-
-	// Allow the road to receive shadows
-	this.mesh.receiveShadow = true; 
-}
-var roadArray = [];
-var obstArray = [];
-function createRoad(){
-
-	var colors = [Colors.blue, Colors.red,  Colors.brown, Colors.pink, Colors.white]
-
-	for (var i = 0; i < 5; i++) {
-		var temp = new Road(colors[i], 800);
-		
-
-		// push it a little bit at the bottom of the scene
-		temp.mesh.position.z = -600 * i;
-
-		roadArray.push(temp);
-
-		// add the mesh of the road to the scene
-		scene.add(temp.mesh);
-		
-
-	}
-}
-
 // Making a player
 Player = function(){
-	var geom = new THREE.BoxGeometry(20,20,20,40,10);
+	var geom = new THREE.BoxGeometry(10,10,10,40,10);
 
 	var mat = new THREE.MeshPhongMaterial({
 		color:Colors.brown,
@@ -328,7 +387,8 @@ function createPlayer(){
 function animate() {
     requestAnimationFrame(animate);
     render();
-}   
+}  
+
 var t = 0;
 var camPosIndex = 0;
 var up = new THREE.Vector3(0, 1, 0);
@@ -339,6 +399,8 @@ var axis2 = new THREE.Vector3( );
 function render() {
 
 		stats.update();
+
+		coinsHolder.rotateCoins();
 
 		keyboard.update();
 		var moveDistance = 50 * clock.getDelta(); 
