@@ -27,6 +27,75 @@ function init() {
 	
 }
 
+function createScene() {
+	HEIGHT = window.innerHeight;
+	WIDTH = window.innerWidth;
+	scene = new THREE.Scene();
+	scene.fog = new THREE.Fog(0xcccccc, 100, 950);
+	aspectRatio = WIDTH / HEIGHT;
+	fieldOfView = 320;
+	nearPlane = 1;
+	farPlane = 20000;
+	
+	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+  camera.position.z = 80;
+  camera.position.y = -125;
+  camera.rotation.x = 60 * Math.PI / 180;
+
+	renderer = new THREE.WebGLRenderer({ 
+		alpha: true, 
+		antialias: true 
+	});
+
+	renderer.setSize(WIDTH, HEIGHT);
+
+	renderer.shadowMap.enabled = true;
+	
+	container = document.getElementById('world');
+	container.appendChild(renderer.domElement);
+
+	// framerate stats
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
+	
+	// Listen to the screen: if the user resizes it
+	// we have to update the camera and the renderer size
+	window.addEventListener('resize', handleWindowResize, false);
+}
+
+	function handleWindowResize() {
+		// update height and width of the renderer and the camera
+		HEIGHT = window.innerHeight;
+		WIDTH = window.innerWidth;
+		renderer.setSize(WIDTH, HEIGHT);
+		camera.aspect = WIDTH / HEIGHT;
+		camera.updateProjectionMatrix();
+	}
+
+var hemisphereLight, shadowLight;
+function createLights() {
+	hemisphereLight = new THREE.HemisphereLight(0xcccccc,0x000000, .9)
+	shadowLight = new THREE.DirectionalLight(0xdddddd, .6);
+	shadowLight.position.set(150, 350, 350);
+	shadowLight.castShadow = true;
+	shadowLight.shadow.camera.left = -400;
+	shadowLight.shadow.camera.right = 400;
+	shadowLight.shadow.camera.top = 400;
+	shadowLight.shadow.camera.bottom = -400;
+	shadowLight.shadow.camera.near = 1;
+	shadowLight.shadow.camera.far = 1000;
+	shadowLight.shadow.mapSize.width = 2048;
+	shadowLight.shadow.mapSize.height = 2048;
+	scene.add(hemisphereLight);  
+	scene.add(shadowLight);
+
+	ambientLight = new THREE.AmbientLight(0x3BB9FF, .5);
+	scene.add(ambientLight);
+}
+
 Player2 = function() {
 	var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) {
@@ -98,7 +167,12 @@ function createH(){
 		new THREE.Vector3(0, 0, 600),
 		new THREE.Vector3(100, 0, 675),
 		new THREE.Vector3(0, 0, 750),
-		new THREE.Vector3(0, 0, 1750)
+		new THREE.Vector3(0, 0, 1750),
+		new THREE.Vector3(50, 0, 1825),
+		new THREE.Vector3(0, 0, 2000),
+		new THREE.Vector3(100, 0, 2075)
+
+
 	  ];
 
   for (var i = 0; i < points.length; i++){
@@ -114,14 +188,11 @@ function createH(){
   var splineGeometry = new THREE.Geometry();
 	splineGeometry.vertices = spline.getPoints( 10000 );
 
-	var splineMaterial = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 19 } );
+	var splineMaterial = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 40 } );
 
 	//Create the final Object3d to add to the scene
 	var splineObject = new THREE.Line( splineGeometry, splineMaterial );
-  //spline2 = new THREE.SplineCurve3(points.slice(0, 3));
-  //spline3 = new THREE.SplineCurve3(points.slice(3, 5));
-  splineObject.translateX(100);
-  splineObject.translateY(20);
+  splineObject.translateY(40);
   scene.add(splineObject)
 
   var sqLength = 20;
@@ -131,8 +202,6 @@ function createH(){
   createCurvePath( Colors.white, spline, 500, sqLength, 1);
 
   var splinePoints = spline.getPoints(1000);
-
-
 
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
@@ -148,18 +217,21 @@ function createH(){
 		});
 
 		var r = Math.random();
-		var geom = new THREE.ConeGeometry( r* 300, r * 250, 3 );
-		if (j%2 ==0 ){
-			geom.translate(sqLength*46, 0 ,0);
-		} 
-
+		var geom = new THREE.ConeGeometry( r* 100, r * 50, 3 );
 		var newMesh = new THREE.Mesh(geom, mat);
 
+		//newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
+
 		newMesh.receiveShadow = true; 
-
 		newMesh.rotation.x = 90 * Math.PI/180;
+		alignmentTransformation(newMesh, j/1000);
 
-		newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
+		if (j%2 ==0 ) {
+			newMesh.translateX(100);
+		} else {
+			newMesh.translateX(-300);
+		}
+		
 
 		scene.add(newMesh);
 	}
@@ -220,7 +292,7 @@ function createCurvePath(color, spline, steps, sqLength, percentage, first){
 	}
 	
 	var extrudeSettings = {
-    steps           : 1000,
+    steps           : 10000,
     bevelEnabled    : false,
     extrudePath     : spline
 	};
@@ -382,74 +454,6 @@ var speed = 0.0003;
 
 
 
-function createScene() {
-	HEIGHT = window.innerHeight;
-	WIDTH = window.innerWidth;
-	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(0xcccccc, 100, 950);
-	aspectRatio = WIDTH / HEIGHT;
-	fieldOfView = 320;
-	nearPlane = 1;
-	farPlane = 20000;
-	
-	camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-  camera.position.z = 80;
-  camera.position.y = -125;
-  camera.rotation.x = 60 * Math.PI / 180;
-
-	renderer = new THREE.WebGLRenderer({ 
-		alpha: true, 
-		antialias: true 
-	});
-
-	renderer.setSize(WIDTH, HEIGHT);
-
-	renderer.shadowMap.enabled = true;
-	
-	container = document.getElementById('world');
-	container.appendChild(renderer.domElement);
-
-	// framerate stats
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
-	
-	// Listen to the screen: if the user resizes it
-	// we have to update the camera and the renderer size
-	window.addEventListener('resize', handleWindowResize, false);
-}
-
-	function handleWindowResize() {
-		// update height and width of the renderer and the camera
-		HEIGHT = window.innerHeight;
-		WIDTH = window.innerWidth;
-		renderer.setSize(WIDTH, HEIGHT);
-		camera.aspect = WIDTH / HEIGHT;
-		camera.updateProjectionMatrix();
-	}
-
-var hemisphereLight, shadowLight;
-function createLights() {
-	hemisphereLight = new THREE.HemisphereLight(0xcccccc,0x000000, .9)
-	shadowLight = new THREE.DirectionalLight(0xdddddd, .6);
-	shadowLight.position.set(150, 350, 350);
-	shadowLight.castShadow = true;
-	shadowLight.shadow.camera.left = -400;
-	shadowLight.shadow.camera.right = 400;
-	shadowLight.shadow.camera.top = 400;
-	shadowLight.shadow.camera.bottom = -400;
-	shadowLight.shadow.camera.near = 1;
-	shadowLight.shadow.camera.far = 1000;
-	shadowLight.shadow.mapSize.width = 2048;
-	shadowLight.shadow.mapSize.height = 2048;
-	scene.add(hemisphereLight);  
-	scene.add(shadowLight);
-
-	ambientLight = new THREE.AmbientLight(0x3BB9FF, .5);
-	scene.add(ambientLight);
-}
 
 // Animation stuff
 function animate() {
@@ -471,57 +475,16 @@ function render() {
 		coinsHolder.rotateCoins();
 
 		keyboard.update();
-		var moveDistance = 50 * clock.getDelta(); 
-		if ( keyboard.pressed("A") ) {
-			xposition = xposition-moveDistance ;
 
-		}
-    if ( keyboard.pressed("D") ) {
-			xposition = xposition+moveDistance ;
+		checkControls();
 		
-		}
-		if ( keyboard.down("S") ) {
-			speed += 0.0003
-			$('#pb').attr('aria-valuenow', 80 );
-		}	
-		if ( keyboard.up("S") ) {
-			speed = 0.0003
-			$('#pb').attr('aria-valuenow', 20 );
-		}	
-    
     // set the marker position
-    pt = spline.getPoint( t );
-    player.position.set( pt.x, pt.y, pt.z);
-    player.translateX(xposition);
+
+    alignmentTransformation(player, t);
     
-    // get the tangent to the curve
-    tangent = spline.getTangent( t ).normalize();
-    
-    // calculate the axis to rotate around
-    axis.crossVectors( up, tangent ).normalize();
-    axis2.crossVectors( straight, tangent ).normalize();
-    
-    // calcluate the angle between the up vector and the tangent
-    radians = Math.acos( up.dot( tangent ) );
-        
-    // set the quaternion
-    player.quaternion.setFromAxisAngle( axis, radians );
-    
-    radians = Math.asin(straight.dot(tangent));
-    player.rotation.x = radians * Math.PI / 180;
     //player.quaternion.setFromAxisAngle( axis2, radians );
 
-    if (radians > 0) {
-    	//player.translateZ(Math.sin(radians) * 20);
-
-    } else  {
-    	//player.translateZ(Math.cos(radians) * 20);
-    }
-
-    player.translateZ(10);
-
-    
-
+    player.translateX(xposition);
 
 		if (t  > 0.3 ){
     	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.brown, wireframe: false } );
@@ -538,13 +501,50 @@ function render() {
     	$('#flashText').hide();
     }
 
-
-        if (t > 0.8) speed = 0.00005;
+    if (t > 0.8) speed = 0.00005;
     t = (t >= 1) ? 0 : t += speed;
 
     renderer.render(scene, camera); 
 
-     $('#myCanvas').show();
+}
+
+function alignmentTransformation(player, t){
+	pt = spline.getPoint( t );
+  player.position.set( pt.x, pt.y, pt.z);
+  
+  // get the tangent to the curve
+  tangent = spline.getTangent( t ).normalize();
+  
+  // calculate the axis to rotate around
+  axis.crossVectors( up, tangent ).normalize();
+  axis2.crossVectors( straight, tangent ).normalize();
+  
+  // calcluate the angle between the up vector and the tangent
+  radians = Math.acos( up.dot( tangent ) );
+      
+  // set the quaternion
+  player.quaternion.setFromAxisAngle( axis, radians );
+  
+  radians = Math.asin(straight.dot(tangent));
+  player.rotation.x = radians * Math.PI / 180;
+}
+
+function checkControls(){
+	var moveDistance = 50 * clock.getDelta(); 
+		if ( keyboard.pressed("A") ) {
+			xposition = xposition-moveDistance ;
+		}
+    if ( keyboard.pressed("D") ) {
+			xposition = xposition+moveDistance ;
+		}
+		if ( keyboard.down("S") ) {
+			speed += 0.0003
+			$('#pb').attr('aria-valuenow', 80 );
+		}	
+		if ( keyboard.up("S") ) {
+			speed = 0.0003
+			$('#pb').attr('aria-valuenow', 20 );
+		}	
 }
 
 function update(radians)
