@@ -30,15 +30,12 @@ function init() {
 Player2 = function() {
 	var manager = new THREE.LoadingManager();
 	manager.onProgress = function ( item, loaded, total ) {
-
 		console.log( item, loaded, total );
-
 	};
 
 	var loader = new THREE.OBJLoader( manager );
 	var mesh ;
 
-	
 	loader.load( 'tricycle.obj', function ( object) {
 		object.traverse( function ( child ) {
 			var bodyMat = new THREE.MeshPhongMaterial({color:Colors.pink, shading:THREE.FlatShading});
@@ -48,12 +45,7 @@ Player2 = function() {
 		} );
 		
 		set(object, true);
-		
 	} );
-
-	
-
-	//this.mesh = playerObj;
 }
 
 function set(object){
@@ -85,8 +77,7 @@ Player = function(){
 }
 var player;
 function createPlayer(){
-	player = new Player2();
-	
+	player = new Player2();	
 }
 
 function setXInitialPosition(){
@@ -95,7 +86,8 @@ function setXInitialPosition(){
 }
 
 function createH(){
-	points =  [new THREE.Vector3(0, 0, 0),
+	points =  [
+		new THREE.Vector3(0, 0, 0),
 	  new THREE.Vector3(100, 0, 75),
 	  new THREE.Vector3(0, 0, 150),
 	  new THREE.Vector3(50, 0, 225),
@@ -105,7 +97,8 @@ function createH(){
 	  new THREE.Vector3(50, 0, 525),
 		new THREE.Vector3(0, 0, 600),
 		new THREE.Vector3(100, 0, 675),
-		new THREE.Vector3(0, 0, 750)
+		new THREE.Vector3(0, 0, 750),
+		new THREE.Vector3(0, 0, 1750)
 	  ];
 
   for (var i = 0; i < points.length; i++){
@@ -116,8 +109,20 @@ function createH(){
   }
 
   spline = new THREE.SplineCurve3(points);
+
+
+  var splineGeometry = new THREE.Geometry();
+	splineGeometry.vertices = spline.getPoints( 10000 );
+
+	var splineMaterial = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 19 } );
+
+	//Create the final Object3d to add to the scene
+	var splineObject = new THREE.Line( splineGeometry, splineMaterial );
   //spline2 = new THREE.SplineCurve3(points.slice(0, 3));
   //spline3 = new THREE.SplineCurve3(points.slice(3, 5));
+  splineObject.translateX(100);
+  splineObject.translateY(20);
+  scene.add(splineObject)
 
   var sqLength = 20;
 
@@ -126,6 +131,9 @@ function createH(){
   createCurvePath( Colors.white, spline, 500, sqLength, 1);
 
   var splinePoints = spline.getPoints(1000);
+
+
+
 	var coneMasterGeometry = new THREE.Geometry();
 	for (var j = 0; j < 1000; j += 1){
   	if (typeof(splinePoints[j]) == 'undefined') {
@@ -402,11 +410,11 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	// framerate stats
-	//stats = new Stats();
-	//stats.domElement.style.position = 'absolute';
-	//stats.domElement.style.bottom = '0px';
-	//stats.domElement.style.zIndex = 100;
-	//container.appendChild( stats.domElement );
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
 	
 	// Listen to the screen: if the user resizes it
 	// we have to update the camera and the renderer size
@@ -465,10 +473,12 @@ function render() {
 		keyboard.update();
 		var moveDistance = 50 * clock.getDelta(); 
 		if ( keyboard.pressed("A") ) {
-			xposition = xposition-moveDistance ;		
+			xposition = xposition-moveDistance ;
+
 		}
     if ( keyboard.pressed("D") ) {
 			xposition = xposition+moveDistance ;
+		
 		}
 		if ( keyboard.down("S") ) {
 			speed += 0.0003
@@ -510,6 +520,8 @@ function render() {
 
     player.translateZ(10);
 
+    
+
 
 		if (t  > 0.3 ){
     	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.brown, wireframe: false } );
@@ -527,10 +539,12 @@ function render() {
     }
 
 
-        
+        if (t > 0.8) speed = 0.00005;
     t = (t >= 1) ? 0 : t += speed;
 
     renderer.render(scene, camera); 
+
+     $('#myCanvas').show();
 }
 
 function update(radians)
