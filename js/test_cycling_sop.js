@@ -9,9 +9,17 @@ var keyboard = new KeyboardState();
 var OC;
 
 /// CONSTANTS
-var TRAILWIDTH = 100;
+var TRAILWIDTH = 120;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 1000;
+var ROWS = 10;
+var ROWSIZE = SECTIONHEIGHT/ROWS;
+
+
+// LANES
+var LANESPACING = 10;
+var LANEWIDTH= 20;
+var lanes = [-LANEWIDTH/2-LANESPACING-LANEWIDTH/2, 0,  +LANEWIDTH/2+LANESPACING+LANEWIDTH/2] ;
 
 window.addEventListener('load', init, false);
 
@@ -98,9 +106,14 @@ var Colors = {
 ObjectContainer = function(objArray) {};
 
 ObjectContainer.prototype.initialize = function(name){
-	if (name == 'underWorld' || name == 'trail'){
+	if (name == 'underWorld' || name == 'trail' || name == 'lane' || name == 'chargingObstacleContainer'){
 		this[name] = [];
-	} 
+	} else if (name == "obstacleContainer") {
+		this[name] = [];
+		for (var r = 0; r < ROWS; r++){
+			this[name].push([]);
+		}
+	}
 }
 
 function init() {
@@ -111,19 +124,21 @@ function init() {
 
 	OC.initialize('underWorld');
 	OC.initialize('trail');
+	OC.initialize('lane');
 	OC.initialize('player');
 	OC.initialize('chasingBall');
 	OC.initialize('fallingObject');
 	OC.initialize('chargingObstacle');
+	OC.initialize('obstacleContainer');
+	OC.initialize('chargingObstacleContainer');
 
 	// Player loading starts the gmame
 	createSection();
 	createPlayer();	
 	createChasingBall();
-	createFallingObstacle();
-	createChargingObstacle();
-
-
+	//createFallingObstacle(5, 1);
+	createObstacleContainer();
+	createChargingObstacleContainer();
 }
 
 function createPlayer() {
@@ -163,9 +178,38 @@ function createChasingBall() {
 	scene.add( sphere );
 }
 
+function createObstacleContainer() {
+
+	for (var r = 1; r < ROWS; r++){
+		// random number of obstacles
+		var rnd = Math.random() * 2 | 0;
+		console.log(r, rnd);
+		for (var o = 0; o < rnd; o++){
+			// make the obstacles either falling or stable
+			var rndForm = Math.random();
+			//if (rndForm < 0.5){
+			var rndLane = Math.random() * 3 | 0;
+			createFallingObstacle(r, rndLane);
+			//OC['obstacleContainer'].push()
+			//}
+		}
+	}
+}
+
+function createChargingObstacleContainer() {
+	for (var r = 6; r < ROWS; r++){
+		// create 4 charging obstacles in the latter rows
+		
+		// choose lane at random
+		var rndLane = Math.random() * 3 | 0;
+		createChargingObstacle(r, rndLane)
+	}
+}
+
 // (lane, distance, distanceActivation)
-function createFallingObstacle(){
-	var geometry = new THREE.BoxGeometry( 10, 10, 10);
+function createFallingObstacle(row, laneNr){
+	var size = LANEWIDTH + LANESPACING;
+	var geometry = new THREE.BoxGeometry( size, size, size);
 	//geometry.translate(0, -35, radius);
 	var material = new THREE.MeshBasicMaterial( {
 		color: Colors.pink, 
@@ -173,14 +217,16 @@ function createFallingObstacle(){
 		wireframeLinewidth: 2
 	} );
 	var fallingObject = new THREE.Mesh( geometry, material );
-	fallingObject.position.y = SECTIONHEIGHT*0.75;
+	fallingObject.position.y = row*ROWSIZE;
 	fallingObject.position.z = 100;
-	OC['fallingObject'] = fallingObject;
+	fallingObject.position.x = lanes[laneNr];
+	OC['obstacleContainer'][row].push(fallingObject);
 	scene.add(fallingObject);
 }
 
-function createChargingObstacle(){
-	var geometry = new THREE.BoxGeometry( 10, 10, 10);
+function createChargingObstacle(row, laneNr){
+	var size = LANEWIDTH + LANESPACING;
+	var geometry = new THREE.BoxGeometry( size, size, size);
 	//geometry.translate(0, -35, radius);
 	var material = new THREE.MeshBasicMaterial( {
 		color: Colors.pink, 
@@ -188,14 +234,11 @@ function createChargingObstacle(){
 		wireframeLinewidth: 2
 	} );
 	var chargingObstacle = new THREE.Mesh( geometry, material );
-	chargingObstacle.position.y = SECTIONHEIGHT*0.75;
-	chargingObstacle.position.x = -30;
-	chargingObstacle.position.z = 5;
-
-	OC['chargingObstacle'] = chargingObstacle;
-
+	chargingObstacle.position.y = row*ROWSIZE;
+	chargingObstacle.position.x = lanes[laneNr];
+	chargingObstacle.position.z = 2;
+	OC['chargingObstacleContainer'].push(chargingObstacle);
 	scene.add(chargingObstacle);
-
 }
 
 function set(object, name){
@@ -203,7 +246,7 @@ function set(object, name){
 	OC[name] = object;
 	scene.add(object);
 	if (name == "player"){
-		object.add(camera);
+		//object.add(camera);
 		var bbox = new THREE.Box3().setFromObject(object);
 		var displacement = bbox.max.y - bbox.min.y;
 		object.position.y += displacement;
@@ -212,8 +255,10 @@ function set(object, name){
 }
 
 function createSection() {
+	var delimiterSize = 20;
+
 	var pg = new THREE.PlaneGeometry(SECTIONHEIGHT, SECTIONHEIGHT, 30, 30);
-	createDelimiter(pg);
+	createDelimiter(pg, delimiterSize);
 	pg.translate(0, SECTIONHEIGHT/2, 0);
 	var pm = new THREE.MeshPhongMaterial({
 		color:Colors.brown,
@@ -238,12 +283,34 @@ function createSection() {
 	OC['trail'].push(trail);
 	scene.add(trail);
 
-	var cg = new THREE.BoxGeometry(20, 20, 20)
+	var cols = [Colors.red, Colors.white, Colors.brown]
+
+	var dist = ((TRAILWIDTH - delimiterSize * 2) - LANESPACING*4)/ 3; //120-40 - 20
+
+	for (var l = 0; l < 3; l++){
+		var pg = new THREE.PlaneGeometry(LANEWIDTH, SECTIONHEIGHT, 30, 30);
+		if (l == 0)
+			pg.translate(lanes[0], SECTIONHEIGHT/2, 2);
+		if (l == 1)
+			pg.translate(lanes[1], SECTIONHEIGHT/2, 2);
+		if (l == 2)
+			pg.translate(lanes[2], SECTIONHEIGHT/2, 2);
+		var pm = new THREE.MeshPhongMaterial({
+			color:cols[l%2],
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+		var lane = new THREE.Mesh(pg, pm);
+		OC['lane'].push(lane);
+		scene.add(lane);
+	}
+
 }
 
-function createDelimiter(pg){
+function createDelimiter(pg, boxSize){
 	for (var i = 0; i < 2; i++){
-		var cg = new THREE.BoxGeometry(20, 20, 20)
+		var cg = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
 		if (i%2 == 0)
 			cg.translate(-TRAILWIDTH/2, 0, 0)
 		else 
@@ -255,16 +322,36 @@ function createDelimiter(pg){
 var _tick = 0;
 function loop(){
 
-	OC['player'].position.y += 1;
-	OC['chasingBall'].position.y += 1;
+	OC['player'].position.y += 2;
+	OC['chasingBall'].position.y += 2;
+	camera.position.y += 2;
 
-	if(OC['player'].position.y > 500 && OC['fallingObject'].position.z > 5 ){
-		OC['fallingObject'].position.z -= 1;
+
+	var rowNr = (OC['player'].position.y / ROWSIZE | 0) + 1;
+	//console.log(rowNr);
+
+	if (rowNr < ROWS){
+		for (var o = 0; o < OC['obstacleContainer'][rowNr].length; o++){
+			var condition = OC['obstacleContainer'][rowNr][o].position.y - OC['player'].position.y;
+			//console.log(condition, rowNr);
+			if(condition < 550 && OC['obstacleContainer'][rowNr][o].position.z > 5 ){
+				OC['obstacleContainer'][rowNr][o].position.z -= 2;
+			}
+		}
+		for (var o = 0; o < OC['chargingObstacleContainer'].length; o++){
+			var condition = OC['chargingObstacleContainer'][o].position.y - OC['player'].position.y;
+			//console.log(condition, rowNr);
+			if(condition < 450){
+				OC['chargingObstacleContainer'][o].position.y -= 2;
+			}
+		}
 	}
 
-	if(OC['player'].position.y > 250 && OC['fallingObject'].position.z > 5 ){
-		OC['chargingObstacle'].position.y -= 3;
-	}
+	
+	
+
+	
+	updateKeyboard();
 
 	
 	_tick += 1
@@ -282,6 +369,7 @@ function loop(){
 	if (OC['player'].position.y > SECTIONHEIGHT){
 		OC['player'].position.y = 0;
 		OC['chasingBall'].position.y = -55;
+		camera.position.y = -125;
 
 	}
 
@@ -292,5 +380,30 @@ function loop(){
 	// call the loop function again
 	requestAnimationFrame(loop);
 
+}
+
+function updateKeyboard(){
+	keyboard.update();
+
+	var mesh = OC.player;
+
+	var moveDistance = 50 * clock.getDelta(); 
+
+	if ( keyboard.down("A") ) 
+		mesh.translateX( -LANEWIDTH - LANESPACING );
+		//console.log('left');
+	if ( keyboard.down("D") ) 
+		mesh.translateX(  + LANEWIDTH + LANESPACING );
+	if ( keyboard.pressed("Q") )
+		mesh.translateX( -moveDistance );
+	if ( keyboard.pressed("E") )
+		mesh.translateX(  moveDistance );
+	if ( keyboard.down("S") ){
+		//speed += 5;
+		//player.position.z -= 10;
+	}
+	//$('#pb').attr('aria-valuenow', speed*10);
+	if ( keyboard.up("S") ) {}
+		//speed = 1;
 }
 
