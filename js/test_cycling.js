@@ -219,7 +219,7 @@ function createH(){
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
-  for (var j = 0; j < 10000; j += 50){
+  for (var j = 0; j < 10000; j += 10){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
@@ -241,7 +241,7 @@ function createH(){
     axis.crossVectors( up, tangent ).normalize();
     radians = Math.acos( up.dot( tangent ) ); 
     newMesh.quaternion.setFromAxisAngle( axis, radians );
-    newMesh.rotation.x = Math.random()  * 3 * Math.PI / 180;
+    //newMesh.rotation.x = Math.random()  * 3 * Math.PI / 180;
     var rnd =  Math.random() * 100;
 		newMesh.translateX( - rnd - 50);
 		newMesh.translateZ(10);
@@ -560,7 +560,7 @@ CoinsHolder.prototype.spawnCoins = function(x, y, z){
     coin.distance = 5 + Math.cos(i*.5)*amplitude;
 
     coin.mesh.position.y = y;
-    coin.mesh.position.x = x;
+    coin.mesh.position.x = x ;
     coin.mesh.position.z = z;
 
   }
