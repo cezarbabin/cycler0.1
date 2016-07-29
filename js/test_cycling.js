@@ -24,7 +24,6 @@ function init() {
 	createScene();
 	createLights();
 	createPlayer();
-	
 }
 
 function createScene() {
@@ -66,19 +65,19 @@ function createScene() {
 	window.addEventListener('resize', handleWindowResize, false);
 }
 
-	function handleWindowResize() {
-		// update height and width of the renderer and the camera
-		HEIGHT = window.innerHeight;
-		WIDTH = window.innerWidth;
-		renderer.setSize(WIDTH, HEIGHT);
-		camera.aspect = WIDTH / HEIGHT;
-		camera.updateProjectionMatrix();
-	}
+function handleWindowResize() {
+	// update height and width of the renderer and the camera
+	HEIGHT = window.innerHeight;
+	WIDTH = window.innerWidth;
+	renderer.setSize(WIDTH, HEIGHT);
+	camera.aspect = WIDTH / HEIGHT;
+	camera.updateProjectionMatrix();
+}
 
 var hemisphereLight, shadowLight;
 function createLights() {
 	hemisphereLight = new THREE.HemisphereLight(0xcccccc,0x000000, .9)
-	shadowLight = new THREE.DirectionalLight(0xdddddd, .6);
+	shadowLight = new THREE.DirectionalLight(0x7ec0ee, .6);
 	shadowLight.position.set(150, 350, 350);
 	shadowLight.castShadow = true;
 	shadowLight.shadow.camera.left = -400;
@@ -92,8 +91,10 @@ function createLights() {
 	scene.add(hemisphereLight);  
 	scene.add(shadowLight);
 
-	ambientLight = new THREE.AmbientLight(0x3BB9FF, .5);
-	scene.add(ambientLight);
+	ambientLight = new THREE.AmbientLight(0xFFCC00, .2);
+	ambientLight2 = new THREE.AmbientLight(0xDDC0B2, .4);
+	//scene.add(ambientLight);
+	//scene.add(ambientLight2);
 }
 
 Player2 = function() {
@@ -107,7 +108,7 @@ Player2 = function() {
 
 	loader.load( 'tricycle.obj', function ( object) {
 		object.traverse( function ( child ) {
-			var bodyMat = new THREE.MeshPhongMaterial({color:Colors.pink, shading:THREE.FlatShading});
+			var bodyMat = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
 			if ( child instanceof THREE.Mesh ) {
 				child.material = bodyMat;
 			}
@@ -120,7 +121,7 @@ Player2 = function() {
 function set(object){
 	player = object;
 	player.position.y = 10;
-	player.position.z = 180;
+	player.position.z = 130;
 	player.add(camera);
 	scene.add(player);
 	createH();
@@ -166,75 +167,43 @@ function createH(){
 	  new THREE.Vector3(50, 0, 525),
 		new THREE.Vector3(0, 0, 600),
 		new THREE.Vector3(100, 0, 675),
-		new THREE.Vector3(0, 0, 750),
-		new THREE.Vector3(0, 0, 1750),
-		new THREE.Vector3(50, 0, 1825),
-		new THREE.Vector3(0, 0, 2000),
-		new THREE.Vector3(100, 0, 2075)
+		new THREE.Vector3(0, 0, 750)
+	 ];
 
-
-	  ];
+	 for (var p = 0; p < 12; p++){
+	 	var x;
+	 	if (p%3 == 0)
+	 		x = 50;
+	 	else if (p%3 == 1)
+	 		x = 0;
+	 	else 
+	 		x = 100;
+	 	points.push(new THREE.Vector3(x, 0, 750 + (p + 1) * 75));
+	 }
 
   for (var i = 0; i < points.length; i++){
       var axis = new THREE.Vector3( 1, 0, 0 );
       var angle = Math.PI / 2;
       points[i].applyAxisAngle( axis, angle );
-      points[i].multiplyScalar(30); 
+      points[i].multiplyScalar(60); 
   }
 
   spline = new THREE.SplineCurve3(points);
 
+  // Create spline guide 
+  //splineGuide();
+ 
+  // Create road
+  createCurvePath( '#ededed', spline, 500, 45, 1);
 
-  var splineGeometry = new THREE.Geometry();
-	splineGeometry.vertices = spline.getPoints( 10000 );
-
-	var splineMaterial = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 40 } );
-
-	//Create the final Object3d to add to the scene
-	var splineObject = new THREE.Line( splineGeometry, splineMaterial );
-  splineObject.translateY(40);
-  scene.add(splineObject)
-
-  var sqLength = 20;
-
-
-  //createCurvePath( Colors.brown, spline, 500, sqLength, 0.25);
-  createCurvePath( Colors.white, spline, 500, sqLength, 1);
 
   var splinePoints = spline.getPoints(1000);
 
-	var coneMasterGeometry = new THREE.Geometry();
-	for (var j = 0; j < 1000; j += 1){
-  	if (typeof(splinePoints[j]) == 'undefined') {
-  		break;
-		}
-  	
-		var mat = new THREE.MeshPhongMaterial({
-			color:0x00FF7F,
-			transparent:true,
-			opacity:1,
-			shading:THREE.FlatShading,
-		});
-
-		var r = Math.random();
-		var geom = new THREE.ConeGeometry( r* 100, r * 50, 3 );
-		var newMesh = new THREE.Mesh(geom, mat);
-
-		//newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
-
-		newMesh.receiveShadow = true; 
-		newMesh.rotation.x = 90 * Math.PI/180;
-		alignmentTransformation(newMesh, j/1000);
-
-		if (j%2 ==0 ) {
-			newMesh.translateX(100);
-		} else {
-			newMesh.translateX(-300);
-		}
-		
-
-		scene.add(newMesh);
-	}
+  // Create mountains
+  createTrees(200, 400, splinePoints);
+  createGluten(0, 200, splinePoints);
+  createTrees(400, 600, splinePoints);
+  createMountains(600, 800, splinePoints);
 
 	// PARTICLES AND COINS
 	for (var i=0; i<10; i++){
@@ -250,13 +219,13 @@ function createH(){
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
-  for (var j = 0; j < 10000; j += 200){
+  for (var j = 0; j < 10000; j += 50){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
   	var geom = new THREE.DodecahedronGeometry(10, 0 );
 		var mat = new THREE.MeshPhongMaterial({
-			color:Colors.red,
+			color:Colors.blue,
 			transparent:true,
 			opacity:1,
 			shading:THREE.FlatShading,
@@ -278,9 +247,176 @@ function createH(){
 		newMesh.translateZ(10);
 
 		coinsHolder.spawnCoins(newMesh.position.x, newMesh.position.y, newMesh.position.z);
-
-
   }
+}
+
+function createTrees(start, end, splinePoints){
+	
+	var coneMasterGeometry = new THREE.Geometry();
+	for (var j = start; j < end; j += 1){
+  	if (typeof(splinePoints[j]) == 'undefined') {
+  		break;
+		}
+
+		var colorito = ["#B2EC5D", "#77DD77", "#008000", "#85BB65", "#87A96B"];
+  	
+		var mat = new THREE.MeshPhongMaterial({
+			color:colorito[Math.floor(Math.random()*colorito.length)],
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var mat2 = new THREE.MeshPhongMaterial({
+			color:Colors.brown,
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var r = Math.random() * (0.7 - 0.3) + 0.3;
+		var geom = new THREE.BoxGeometry( r* 100, r * 100,  r*100);
+		var geomBottom = new THREE.BoxGeometry(  r* 10,  r*10, r * 70);
+
+		var newMesh = new THREE.Mesh(geom, mat);
+		var newMeshBottom = new THREE.Mesh(geomBottom, mat2);
+
+		//newMeshBottom.rotation.y = 90 * Math.PI/180;
+
+		//newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
+		newMesh.receiveShadow = true; 
+		//newMesh.rotation.x = -60 * Math.PI/180;
+		alignmentTransformation(newMesh, j/1000, true);
+		alignmentTransformation(newMeshBottom, j/1000, true);
+
+		
+		if (j%2 ==0 ) {
+			newMesh.translateX(30);
+			newMeshBottom.translateX(30);
+		} else {
+			newMesh.translateX(-230);
+			newMeshBottom.translateX(-230);
+		}
+
+		//newMesh.rotation.x =  10 * Math.PI/180;
+		newMesh.position.z = newMesh.position.z + r*50 + 20;
+		newMeshBottom.position.z = newMeshBottom.position.z + r*25 ;
+
+	
+		scene.add(newMesh);
+		scene.add(newMeshBottom);
+	}
+}
+
+function createMountains(start, end, splinePoints){
+	
+	var coneMasterGeometry = new THREE.Geometry();
+	for (var j = start; j < end; j += 1){
+  	if (typeof(splinePoints[j]) == 'undefined') {
+  		break;
+		}
+
+		var colorito = ["#8e4e8e", "#472747", "#000066", "#8000FF", "#a64dff"];
+  	
+		var mat = new THREE.MeshPhongMaterial({
+			color:colorito[Math.floor(Math.random()*colorito.length)],
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var mat2 = new THREE.MeshPhongMaterial({
+			color:Colors.brown,
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var r = Math.random() * (0.7 - 0.3) + 0.3;
+		var geom = new THREE.TetrahedronGeometry( Math.random() * 70 + 50,0 );
+
+		//console.log(geom.vertices.lengt
+		var newMesh = new THREE.Mesh(geom, mat);
+		newMesh.rotation.z = 90 * Math.random() * Math.PI * 180;
+
+		//newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
+		newMesh.receiveShadow = true; 
+		//newMesh.rotation.x = -60 * Math.PI/180;
+		alignmentTransformation(newMesh, j/1000, true);
+		//newMesh.rotation.z = 90 * Math.random() * Math.PI * 180;
+		
+		if (j%2 ==0 ) {
+			newMesh.translateX(50);
+		} else {
+			newMesh.translateX(-250);
+		}
+
+		//newMesh.rotation.x =  10 * Math.PI/180;
+
+		scene.add(newMesh);
+	}
+}
+
+function createGluten(start, end, splinePoints){
+	
+	var coneMasterGeometry = new THREE.Geometry();
+	for (var j = start; j < end; j += 1){
+  	if (typeof(splinePoints[j]) == 'undefined') {
+  		break;
+		}
+
+		var colorito = ["#FD7D5F", "#fda48f", "#fd977e"];
+  	
+		var mat = new THREE.MeshPhongMaterial({
+			color:colorito[Math.floor(Math.random()*colorito.length)],
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var mat2 = new THREE.MeshPhongMaterial({
+			color:Colors.brown,
+			transparent:true,
+			opacity:1,
+			shading:THREE.FlatShading,
+		});
+
+		var r = Math.random() * (0.7 - 0.3) + 0.3;
+		var geom = new THREE.PlaneGeometry( 200, 500, 30, 30 );
+
+		for (var v = 0; v < geom.vertices.length; v++) {
+			geom.vertices[v].z = Math.random() * 30 + 10;
+		}
+
+		//console.log(geom.vertices.lengt
+		var newMesh = new THREE.Mesh(geom, mat);
+		newMesh.rotation.z = 90 * Math.random() * Math.PI * 180;
+
+		//newMesh.position.set(splinePoints[j].x -250, splinePoints[j].y, splinePoints[j].z);
+		newMesh.receiveShadow = true; 
+		//newMesh.rotation.x = -60 * Math.PI/180;
+		alignmentTransformation(newMesh, j/1000, true);
+		//newMesh.rotation.z = 90 * Math.random() * Math.PI * 180;
+		
+		if (j%2 ==0 ) {
+			newMesh.translateX(80);
+		} else {
+			newMesh.translateX(-280);
+		}
+
+		//newMesh.rotation.x =  10 * Math.PI/180;
+
+		scene.add(newMesh);
+	}
+}
+
+function splineGuide(){
+	var splineGeometry = new THREE.Geometry();
+	splineGeometry.vertices = spline.getPoints( 10000 );
+	var splineMaterial = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 40 } );
+	var splineObject = new THREE.Line( splineGeometry, splineMaterial );
+  splineObject.translateY(40);
+  scene.add(splineObject)
 }
 
 function createCurvePath(color, spline, steps, sqLength, percentage, first){
@@ -302,6 +438,7 @@ function createCurvePath(color, spline, steps, sqLength, percentage, first){
   var geometry = new THREE.ExtrudeGeometry( squareShape, extrudeSettings );
   var material = new THREE.MeshLambertMaterial( { color: color, wireframe: false } );
   meshSpline = new THREE.Mesh( geometry, material );
+ 	meshSpline.translateX(-190);
   scene.add( meshSpline );
 
 }
@@ -309,15 +446,15 @@ function createCurvePath(color, spline, steps, sqLength, percentage, first){
 function createSquare(sqLength){
   var squareShape = new THREE.Shape();
   squareShape.moveTo( 0,0 );
-  squareShape.lineTo( -20,sqLength);
+  //squareShape.lineTo( -9,sqLength);
   squareShape.lineTo( 0,sqLength);
   
   squareShape.lineTo( 1,0);
   squareShape.lineTo( 1,sqLength*9);
   squareShape.lineTo( 0,sqLength*9);
 
-  squareShape.lineTo( -20,sqLength*9);
-  squareShape.lineTo( 0, sqLength *11 );
+  //squareShape.lineTo( -9,sqLength*9);
+  squareShape.lineTo( 0, sqLength *10);
   return squareShape;
 }
 
@@ -383,7 +520,7 @@ ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
 Coin = function(){
   var geom = new THREE.TetrahedronGeometry(20,0);
   var mat = new THREE.MeshPhongMaterial({
-    color:Colors.red,
+    color:Colors.blue,
     shininess:0,
     specular:0xffffff,
 
@@ -440,7 +577,7 @@ CoinsHolder.prototype.rotateCoins = function(){
     if (d<15){
       this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
       this.mesh.remove(coin.mesh);
-      particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, Colors.red, 3);
+      particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, Colors.blue, 3);
       i--;
     }else if (coin.angle > Math.PI){
       this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
@@ -450,10 +587,7 @@ CoinsHolder.prototype.rotateCoins = function(){
   }
 }
 
-var speed = 0.0003;
-
-
-
+var speed = 0.00004;
 
 // Animation stuff
 function animate() {
@@ -468,7 +602,13 @@ var straight = new THREE.Vector3(-1, 0, 0);
 var axis = new THREE.Vector3( );
 var axis2 = new THREE.Vector3( );
 
+var timeStart;
+var timeFinish;
+
 function render() {
+
+		if (t == 0.0001)
+			timeStart = Date.now();
 
 		stats.update();
 
@@ -477,17 +617,13 @@ function render() {
 		keyboard.update();
 
 		checkControls();
-		
-    // set the marker position
 
     alignmentTransformation(player, t);
-    
-    //player.quaternion.setFromAxisAngle( axis2, radians );
 
     player.translateX(xposition);
-
+    
 		if (t  > 0.3 ){
-    	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.brown, wireframe: false } );
+    	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.pink, wireframe: false } );
     	meshSpline.material = newMaterial;
     	meshSpline.material.needsUpdate = true;
     	//speed = speed/2;
@@ -501,32 +637,42 @@ function render() {
     	$('#flashText').hide();
     }
 
-    if (t > 0.8) speed = 0.00005;
+    //if (t > 0.8) speed = 0.0001;
     t = (t >= 1) ? 0 : t += speed;
 
     renderer.render(scene, camera); 
 
+    if (t > 0.9811){
+    	timeEnd = Date.now();
+    	console.log("timpul: " + (timeEnd-timeStart)/1000/60)
+
+    }
+
 }
 
-function alignmentTransformation(player, t){
+function alignmentTransformation(player, t, object){
 	pt = spline.getPoint( t );
+
   player.position.set( pt.x, pt.y, pt.z);
+
   
   // get the tangent to the curve
   tangent = spline.getTangent( t ).normalize();
   
   // calculate the axis to rotate around
   axis.crossVectors( up, tangent ).normalize();
-  axis2.crossVectors( straight, tangent ).normalize();
   
   // calcluate the angle between the up vector and the tangent
   radians = Math.acos( up.dot( tangent ) );
       
   // set the quaternion
+  
   player.quaternion.setFromAxisAngle( axis, radians );
   
   radians = Math.asin(straight.dot(tangent));
-  player.rotation.x = radians * Math.PI / 180;
+
+  if (!object)
+  	player.rotation.x = radians * Math.PI / 180;
 }
 
 function checkControls(){
@@ -542,7 +688,7 @@ function checkControls(){
 			$('#pb').attr('aria-valuenow', 80 );
 		}	
 		if ( keyboard.up("S") ) {
-			speed = 0.0003
+			speed = 0.00004
 			$('#pb').attr('aria-valuenow', 20 );
 		}	
 }
