@@ -113,11 +113,17 @@ function init() {
 	OC.initialize('trail');
 	OC.initialize('player');
 	OC.initialize('chasingBall');
+	OC.initialize('fallingObject');
+	OC.initialize('chargingObstacle');
 
 	// Player loading starts the gmame
 	createSection();
 	createPlayer();	
 	createChasingBall();
+	createFallingObstacle();
+	createChargingObstacle();
+
+
 }
 
 function createPlayer() {
@@ -155,6 +161,41 @@ function createChasingBall() {
 	sphere.rotation.z = 90*Math.PI / 180;
 	OC['chasingBall'] = sphere;
 	scene.add( sphere );
+}
+
+// (lane, distance, distanceActivation)
+function createFallingObstacle(){
+	var geometry = new THREE.BoxGeometry( 10, 10, 10);
+	//geometry.translate(0, -35, radius);
+	var material = new THREE.MeshBasicMaterial( {
+		color: Colors.pink, 
+		wireframe: true, 
+		wireframeLinewidth: 2
+	} );
+	var fallingObject = new THREE.Mesh( geometry, material );
+	fallingObject.position.y = SECTIONHEIGHT*0.75;
+	fallingObject.position.z = 100;
+	OC['fallingObject'] = fallingObject;
+	scene.add(fallingObject);
+}
+
+function createChargingObstacle(){
+	var geometry = new THREE.BoxGeometry( 10, 10, 10);
+	//geometry.translate(0, -35, radius);
+	var material = new THREE.MeshBasicMaterial( {
+		color: Colors.pink, 
+		wireframe: true, 
+		wireframeLinewidth: 2
+	} );
+	var chargingObstacle = new THREE.Mesh( geometry, material );
+	chargingObstacle.position.y = SECTIONHEIGHT*0.75;
+	chargingObstacle.position.x = -30;
+	chargingObstacle.position.z = 5;
+
+	OC['chargingObstacle'] = chargingObstacle;
+
+	scene.add(chargingObstacle);
+
 }
 
 function set(object, name){
@@ -214,8 +255,16 @@ function createDelimiter(pg){
 var _tick = 0;
 function loop(){
 
-	OC['player'].position.y +=1;
+	OC['player'].position.y += 1;
 	OC['chasingBall'].position.y += 1;
+
+	if(OC['player'].position.y > 500 && OC['fallingObject'].position.z > 5 ){
+		OC['fallingObject'].position.z -= 1;
+	}
+
+	if(OC['player'].position.y > 250 && OC['fallingObject'].position.z > 5 ){
+		OC['chargingObstacle'].position.y -= 3;
+	}
 
 	
 	_tick += 1
