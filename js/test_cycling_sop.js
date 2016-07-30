@@ -6,15 +6,15 @@ var stats = new Stats();
 
 var clock = new THREE.Clock();
 var keyboard = new KeyboardState();
-var OC;
+var OC = [];
+var GOC;
 
 /// CONSTANTS
 var TRAILWIDTH = 120;
 var UWWIDTH = 500;
-var SECTIONHEIGHT = 1000;
-var ROWS = 10;
+var SECTIONHEIGHT = 2000;
+var ROWS = 20;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
-
 
 // LANES
 var LANESPACING = 10;
@@ -120,25 +120,35 @@ function init() {
 	$('#flashText').hide();
 	createScene();
 	createLights();
-	OC = new ObjectContainer();
 
-	OC.initialize('underWorld');
-	OC.initialize('trail');
-	OC.initialize('lane');
-	OC.initialize('player');
-	OC.initialize('chasingBall');
-	OC.initialize('fallingObject');
-	OC.initialize('chargingObstacle');
-	OC.initialize('obstacleContainer');
-	OC.initialize('chargingObstacleContainer');
+	for (var i = 0; i < 3; i++) {
+		OC.push(new ObjectContainer());
+	}
 
-	// Player loading starts the gmame
-	createSection();
+	//OC = new ObjectContainer();
+	for (var i = 0; i < 3; i++) {
+		OC[i].initialize('underWorld');
+		OC[i].initialize('trail');
+		OC[i].initialize('lane');
+		OC[i].initialize('fallingObject');
+		OC[i].initialize('chargingObstacle');
+		OC[i].initialize('obstacleContainer');
+		OC[i].initialize('chargingObstacleContainer');
+		// Player loading starts the gmame
+		createSection(i);
+		createObstacleContainer(i);
+		createChargingObstacleContainer(i);
+	}
+
+	GOC = new ObjectContainer();
+
+	
+
+	GOC.initialize('player');
+	GOC.initialize('chasingBall');
+
 	createPlayer();	
 	createChasingBall();
-	//createFallingObstacle(5, 1);
-	createObstacleContainer();
-	createChargingObstacleContainer();
 }
 
 function createPlayer() {
@@ -174,40 +184,36 @@ function createChasingBall() {
 	sphere.position.z = 11;
 	sphere.position.y -= 30;
 	sphere.rotation.z = 90*Math.PI / 180;
-	OC['chasingBall'] = sphere;
+	GOC['chasingBall'] = sphere;
 	scene.add( sphere );
 }
 
-function createObstacleContainer() {
-
+function createObstacleContainer(index) {
 	for (var r = 1; r < ROWS; r++){
 		// random number of obstacles
 		var rnd = Math.random() * 2 | 0;
-		console.log(r, rnd);
+		//console.log(r, rnd);
 		for (var o = 0; o < rnd; o++){
 			// make the obstacles either falling or stable
 			var rndForm = Math.random();
 			//if (rndForm < 0.5){
 			var rndLane = Math.random() * 3 | 0;
-			createFallingObstacle(r, rndLane);
+			createFallingObstacle(r, rndLane, index);
 			//OC['obstacleContainer'].push()
 			//}
 		}
 	}
 }
 
-function createChargingObstacleContainer() {
+function createChargingObstacleContainer(index) {
 	for (var r = 6; r < ROWS; r++){
-		// create 4 charging obstacles in the latter rows
-		
-		// choose lane at random
 		var rndLane = Math.random() * 3 | 0;
-		createChargingObstacle(r, rndLane)
+		createChargingObstacle(r, rndLane, index)
 	}
 }
 
 // (lane, distance, distanceActivation)
-function createFallingObstacle(row, laneNr){
+function createFallingObstacle(row, laneNr, index){
 	var size = LANEWIDTH + LANESPACING;
 	var geometry = new THREE.BoxGeometry( size, size, size);
 	//geometry.translate(0, -35, radius);
@@ -217,14 +223,14 @@ function createFallingObstacle(row, laneNr){
 		wireframeLinewidth: 2
 	} );
 	var fallingObject = new THREE.Mesh( geometry, material );
-	fallingObject.position.y = row*ROWSIZE;
+	fallingObject.position.y = row*ROWSIZE + index*SECTIONHEIGHT;
 	fallingObject.position.z = 100;
 	fallingObject.position.x = lanes[laneNr];
-	OC['obstacleContainer'][row].push(fallingObject);
+	OC[index]['obstacleContainer'][row].push(fallingObject);
 	scene.add(fallingObject);
 }
 
-function createChargingObstacle(row, laneNr){
+function createChargingObstacle(row, laneNr, index){
 	var size = LANEWIDTH + LANESPACING;
 	var geometry = new THREE.BoxGeometry( size, size, size);
 	//geometry.translate(0, -35, radius);
@@ -234,32 +240,34 @@ function createChargingObstacle(row, laneNr){
 		wireframeLinewidth: 2
 	} );
 	var chargingObstacle = new THREE.Mesh( geometry, material );
-	chargingObstacle.position.y = row*ROWSIZE;
+	chargingObstacle.position.y = row*ROWSIZE + index*SECTIONHEIGHT;
 	chargingObstacle.position.x = lanes[laneNr];
 	chargingObstacle.position.z = 2;
-	OC['chargingObstacleContainer'].push(chargingObstacle);
+	console.log(index, row);
+	OC[index]['chargingObstacleContainer'].push(chargingObstacle);
 	scene.add(chargingObstacle);
 }
 
-function set(object, name){
-	OC.initialize('player');
-	OC[name] = object;
-	scene.add(object);
+function set(object, name, index){
 	if (name == "player"){
 		//object.add(camera);
+		GOC[name] = object;
 		var bbox = new THREE.Box3().setFromObject(object);
 		var displacement = bbox.max.y - bbox.min.y;
 		object.position.y += displacement;
 		loop();
+	} else {
+		OC[index][name] = object;
 	}
+	scene.add(object);
 }
 
-function createSection() {
+function createSection(index) {
 	var delimiterSize = 20;
 
 	var pg = new THREE.PlaneGeometry(SECTIONHEIGHT, SECTIONHEIGHT, 30, 30);
-	createDelimiter(pg, delimiterSize);
-	pg.translate(0, SECTIONHEIGHT/2, 0);
+	createDelimiter(pg, delimiterSize, index);
+	pg.translate(0, SECTIONHEIGHT/2 + index*SECTIONHEIGHT, 0);
 	var pm = new THREE.MeshPhongMaterial({
 		color:Colors.brown,
 		transparent:true,
@@ -267,7 +275,7 @@ function createSection() {
 		shading:THREE.FlatShading,
 	});
 	var underWorld = new THREE.Mesh(pg, pm);
-	OC['underWorld'].push(underWorld);
+	OC[index]['underWorld'].push(underWorld);
 	scene.add(underWorld);
 
 	var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 30, 30);
@@ -280,7 +288,8 @@ function createSection() {
 	});
 	var trail = new THREE.Mesh(pg, pm);
 	trail.position.z = 1;
-	OC['trail'].push(trail);
+	trail.position.y = index * SECTIONHEIGHT;
+	OC[index]['trail'].push(trail);
 	scene.add(trail);
 
 	var cols = [Colors.red, Colors.white, Colors.brown]
@@ -290,11 +299,11 @@ function createSection() {
 	for (var l = 0; l < 3; l++){
 		var pg = new THREE.PlaneGeometry(LANEWIDTH, SECTIONHEIGHT, 30, 30);
 		if (l == 0)
-			pg.translate(lanes[0], SECTIONHEIGHT/2, 2);
+			pg.translate(lanes[0], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
 		if (l == 1)
-			pg.translate(lanes[1], SECTIONHEIGHT/2, 2);
+			pg.translate(lanes[1], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
 		if (l == 2)
-			pg.translate(lanes[2], SECTIONHEIGHT/2, 2);
+			pg.translate(lanes[2], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
 		var pm = new THREE.MeshPhongMaterial({
 			color:cols[l%2],
 			transparent:true,
@@ -302,77 +311,71 @@ function createSection() {
 			shading:THREE.FlatShading,
 		});
 		var lane = new THREE.Mesh(pg, pm);
-		OC['lane'].push(lane);
+		OC[index]['lane'].push(lane);
 		scene.add(lane);
 	}
 
 }
 
-function createDelimiter(pg, boxSize){
+function createDelimiter(pg, boxSize, index){
 	for (var i = 0; i < 2; i++){
 		var cg = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
 		if (i%2 == 0)
-			cg.translate(-TRAILWIDTH/2, 0, 0)
+			cg.translate(-TRAILWIDTH/2, 0 + index*SECTIONHEIGHT, 0)
 		else 
-			cg.translate(TRAILWIDTH/2, 0, 0)
+			cg.translate(TRAILWIDTH/2, 0 + index*SECTIONHEIGHT, 0)
 		pg.merge(cg);
 	}
 }
 
 var _tick = 0;
+var speed = 2;
 function loop(){
 
-	OC['player'].position.y += 2;
-	OC['chasingBall'].position.y += 2;
-	camera.position.y += 2;
+	GOC['player'].position.y += speed;
+	GOC['chasingBall'].position.y += speed;
+	camera.position.y += speed;
 
 
-	var rowNr = (OC['player'].position.y / ROWSIZE | 0) + 1;
+	var rowNr = ((GOC['player'].position.y / ROWSIZE | 0) + 1)%ROWS;
+	var sectionNr = (GOC['player'].position.y / SECTIONHEIGHT | 0) % 3;
 	//console.log(rowNr);
 
 	if (rowNr < ROWS){
-		for (var o = 0; o < OC['obstacleContainer'][rowNr].length; o++){
-			var condition = OC['obstacleContainer'][rowNr][o].position.y - OC['player'].position.y;
+		for (var o = 0; o < OC[sectionNr]['obstacleContainer'][rowNr].length; o++){
+			var condition = OC[sectionNr]['obstacleContainer'][rowNr][o].position.y - GOC['player'].position.y;
 			//console.log(condition, rowNr);
-			if(condition < 550 && OC['obstacleContainer'][rowNr][o].position.z > 5 ){
-				OC['obstacleContainer'][rowNr][o].position.z -= 2;
+			if(condition < 550 && OC[sectionNr]['obstacleContainer'][rowNr][o].position.z > 5 ){
+				OC[sectionNr]['obstacleContainer'][rowNr][o].position.z -= 2;
 			}
 		}
-		for (var o = 0; o < OC['chargingObstacleContainer'].length; o++){
-			var condition = OC['chargingObstacleContainer'][o].position.y - OC['player'].position.y;
+		for (var o = 0; o < OC[sectionNr]['chargingObstacleContainer'].length; o++){
+			var condition = OC[sectionNr]['chargingObstacleContainer'][o].position.y - GOC['player'].position.y;
 			//console.log(condition, rowNr);
 			if(condition < 450){
-				OC['chargingObstacleContainer'][o].position.y -= 2;
+				OC[sectionNr]['chargingObstacleContainer'][o].position.y -= 2;
 			}
 		}
 	}
-
-	
-	
-
 	
 	updateKeyboard();
-
 	
 	_tick += 1
 	var axis = new THREE.Vector3( 5.5, 0, 0 );
-	var angle = -_tick * Math.PI / 64;
+	var angle = -_tick * Math.PI / 64 * speed;
 	   // matrix is a THREE.Matrix4()
-	var _mesh = OC['chasingBall']
+	var _mesh = GOC['chasingBall']
 	var _matrix = new THREE.Matrix4()
 
 	_matrix.makeRotationAxis( axis.normalize(), angle ); 
 	_mesh.rotation.setFromRotationMatrix( _matrix );
 
 
-
-	if (OC['player'].position.y > SECTIONHEIGHT){
-		OC['player'].position.y = 0;
-		OC['chasingBall'].position.y = -55;
-		camera.position.y = -125;
-
+	if (GOC['player'].position.y > SECTIONHEIGHT){
+		//GOC['player'].position.y = 0;
+		//GOC['chasingBall'].position.y = -55;
+		//camera.position.y = -125;
 	}
-
 
 	// render the scene
 	renderer.render(scene, camera);
@@ -385,7 +388,7 @@ function loop(){
 function updateKeyboard(){
 	keyboard.update();
 
-	var mesh = OC.player;
+	var mesh = GOC.player;
 
 	var moveDistance = 50 * clock.getDelta(); 
 
