@@ -13,7 +13,7 @@ var GOC;
 var TRAILWIDTH = 120;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 2000;
-var ROWS = 20;
+var ROWS = 15;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
 
 // LANES
@@ -51,11 +51,11 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	// framerate stats
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
+	//stats = new Stats();
+	//stats.domElement.style.position = 'absolute';
+	//stats.domElement.style.bottom = '0px';
+	//stats.domElement.style.zIndex = 100;
+	//container.appendChild( stats.domElement );
 	
 	// Listen to the screen: if the user resizes it
 	// we have to update the camera and the renderer size
@@ -152,7 +152,7 @@ function initializeSection(i) {
 	// Player loading starts the gmame
 	createSection(i);
 	createObstacleContainer(i);
-	createChargingObstacleContainer(i);
+	//createChargingObstacleContainer(i);
 }
 
 function createPlayer() {
@@ -177,7 +177,7 @@ function createPlayer() {
 
 function createChasingBall() {
 	var radius = 10;
-	var geometry = new THREE.SphereGeometry( 10, 6, 6 );
+	var geometry = new THREE.SphereGeometry( 20, 6, 6 );
 	//geometry.translate(0, -35, radius);
 	var material = new THREE.MeshBasicMaterial( {
 		color: 0x000000, 
@@ -185,17 +185,18 @@ function createChasingBall() {
 		wireframeLinewidth: 2
 	} );
 	var sphere = new THREE.Mesh( geometry, material );
-	sphere.position.z = 11;
-	sphere.position.y -= 30;
+	sphere.position.z = 21;
+	sphere.position.y -= 70;
 	sphere.rotation.z = 90*Math.PI / 180;
 	GOC['chasingBall'] = sphere;
 	scene.add( sphere );
 }
 
 function createObstacleContainer(index) {
-	for (var r = 1; r < ROWS; r++){
+	for (var r = 0; r < ROWS; r++){
 		// random number of obstacles
-		var rnd = Math.random() * 2 | 0;
+		console.log(r);
+		var rnd = 2; //Math.random() * 2 | 0;
 		//console.log(r, rnd);
 		for (var o = 0; o < rnd; o++){
 			// make the obstacles either falling or stable
@@ -258,6 +259,7 @@ function set(object, name, index){
 		GOC[name] = object;
 		var bbox = new THREE.Box3().setFromObject(object);
 		var displacement = bbox.max.y - bbox.min.y;
+		object.position.z += 3;
 		object.position.y += displacement;
 		loop();
 	} else {
@@ -333,11 +335,11 @@ function createDelimiter(pg, boxSize, index){
 }
 
 var _tick = 0;
-var speed = 100;
+var speed = 3;
 var sectionChange = 0;
 function loop(){
 
-	stats.update();
+	//stats.update();
 
 	GOC['player'].position.y += speed;
 	GOC['chasingBall'].position.y += speed;
@@ -357,20 +359,15 @@ function loop(){
 	//console.log(rowNr);
 
 	if (rowNr < ROWS){
-		for (var o = 0; o < OC[sectionNr]['obstacleContainer'][rowNr].length; o++){
-			var condition = OC[sectionNr]['obstacleContainer'][rowNr][o].position.y - GOC['player'].position.y;
-			//console.log(condition, rowNr);
-			if(condition < 550 && OC[sectionNr]['obstacleContainer'][rowNr][o].position.z > 5 ){
-				OC[sectionNr]['obstacleContainer'][rowNr][o].position.z -= 2;
-			}
-		}
-		for (var o = 0; o < OC[sectionNr]['chargingObstacleContainer'].length; o++){
-			var condition = OC[sectionNr]['chargingObstacleContainer'][o].position.y - GOC['player'].position.y;
-			//console.log(condition, rowNr);
-			if(condition < 450){
-				OC[sectionNr]['chargingObstacleContainer'][o].position.y -= 2;
-			}
-		}
+		var minRow = 0//rowNr - 1;
+		if (minRow < 0)
+			minRow = 0;
+		var maxRow = ROWS //rowNr + 2;
+		if (maxRow > ROWS)
+			maxRow = ROWS;
+
+		for (var r = minRow; r < maxRow; r++)
+			checkRows(sectionNr, r);
 	}
 	
 	updateKeyboard();
@@ -398,6 +395,23 @@ function loop(){
 	// call the loop function again
 	requestAnimationFrame(loop);
 
+}
+
+function checkRows(sectionNr, rowNr){
+	for (var o = 0; o < OC[sectionNr]['obstacleContainer'][rowNr].length; o++){
+			var condition = OC[sectionNr]['obstacleContainer'][rowNr][o].position.y - GOC['player'].position.y;
+			//console.log(condition, rowNr);
+			if(condition < 150 && OC[sectionNr]['obstacleContainer'][rowNr][o].position.z > 5 ){
+				OC[sectionNr]['obstacleContainer'][rowNr][o].position.z -= 2;
+			}
+		}
+		for (var o = 0; o < OC[sectionNr]['chargingObstacleContainer'].length; o++){
+			var condition = OC[sectionNr]['chargingObstacleContainer'][o].position.y - GOC['player'].position.y;
+			//console.log(condition, rowNr);
+			if(condition < 650){
+				OC[sectionNr]['chargingObstacleContainer'][o].position.y -= 1;
+			}
+		}
 }
 
 function disposeOf(sectionNr){

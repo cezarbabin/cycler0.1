@@ -67,11 +67,11 @@ function createScene() {
 	container = document.getElementById('world');
 	container.appendChild(renderer.domElement);
 
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
+	//stats = new Stats();
+	//stats.domElement.style.position = 'absolute';
+	//stats.domElement.style.bottom = '0px';
+	//stats.domElement.style.zIndex = 100;
+	//container.appendChild( stats.domElement );
 	
 	window.addEventListener('resize', handleWindowResize, false);
 }
@@ -276,7 +276,7 @@ Player2 = function(enemy) {
 	if (enemy){
 		loader.load( 'untitled2.obj', function ( object) {
 			object.traverse( function ( child ) {
-				var bodyMat = new THREE.MeshPhongMaterial({color:Colors.pink, shading:THREE.FlatShading});
+				var bodyMat = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading, opacity:0.5});
 				if ( child instanceof THREE.Mesh ) {
 					child.material = bodyMat;
 				}
@@ -333,7 +333,7 @@ function createPlayer(player){
 function createEnemy(enemy){
 	enemy.position.y = 20;
 	enemy.position.z = 90;
-	enemy.position.x = 20;
+	//enemy.position.x = 20;
 	//console.log(enemy.mesh);
 	scene.add(enemy);
 	this.enemy = enemy;

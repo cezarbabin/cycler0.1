@@ -20,7 +20,7 @@ var Colors = {
 };
 
 function init() {
-	$('#flashText').hide();
+	//$('#flashText').hide();
 	createScene();
 	createLights();
 	createPlayer();
@@ -54,11 +54,11 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	// framerate stats
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
+	//stats = new Stats();
+	//stats.domElement.style.position = 'absolute';
+	//stats.domElement.style.bottom = '0px';
+	//stats.domElement.style.zIndex = 100;
+	//container.appendChild( stats.domElement );
 	
 	// Listen to the screen: if the user resizes it
 	// we have to update the camera and the renderer size
@@ -219,7 +219,7 @@ function createH(){
   var up = new THREE.Vector3(0, 1, 0);
 	var axis = new THREE.Vector3( );
 	var radians;
-  for (var j = 0; j < 10000; j += 10){
+  for (var j = 0; j < 10000; j += 20){
   	if (typeof(splinePoints[j]) == 'undefined') {
   		break;
 		}
@@ -365,7 +365,7 @@ function createGluten(start, end, splinePoints){
   		break;
 		}
 
-		var colorito = ["#FD7D5F", "#fda48f", "#fd977e"];
+		var colorito = ["#FFB90F", "#FBDB0C", "#CDCD00"];
   	
 		var mat = new THREE.MeshPhongMaterial({
 			color:colorito[Math.floor(Math.random()*colorito.length)],
@@ -587,7 +587,7 @@ CoinsHolder.prototype.rotateCoins = function(){
   }
 }
 
-var speed = 0.00004;
+var speed = 0.00006;
 
 // Animation stuff
 function animate() {
@@ -621,12 +621,19 @@ function render() {
     alignmentTransformation(player, t);
 
     player.translateX(xposition);
+    player.translateZ(5);
+
+    //$('#flashText').text();
+    //var d = Date.now();
+    //d = d.toString();
+    //$('#flashWrite').text("00:" + (100 - parseInt(d.substring(8, 10))) + ":" + (9 - parseInt(d.substring(10, 11))));
     
 		if (t  > 0.3 ){
     	var newMaterial = new THREE.MeshLambertMaterial( { color: Colors.pink, wireframe: false } );
     	meshSpline.material = newMaterial;
     	meshSpline.material.needsUpdate = true;
     	//speed = speed/2;
+
     	$('#flashText').show();
     }
     if (t > 0.5 ){
@@ -684,11 +691,11 @@ function checkControls(){
 			xposition = xposition+moveDistance ;
 		}
 		if ( keyboard.down("S") ) {
-			speed += 0.0003
+			speed += 0.00015
 			$('#pb').attr('aria-valuenow', 80 );
 		}	
 		if ( keyboard.up("S") ) {
-			speed = 0.00004
+			speed = 0.00008
 			$('#pb').attr('aria-valuenow', 20 );
 		}	
 }
