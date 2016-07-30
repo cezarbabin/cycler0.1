@@ -42,7 +42,7 @@ function createScene() {
                                        alpha: true,
                                        antialias: true
                                        });
-    //renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize(WIDTH, HEIGHT);
     
    
