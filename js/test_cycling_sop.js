@@ -345,7 +345,7 @@ function loop(){
 
 
 	var rowNr = ((GOC['player'].position.y / ROWSIZE | 0) + 1)%ROWS;
-	var sectionNr = (GOC['player'].position.y / SECTIONHEIGHT | 0) % 3;
+	var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % 3;
 	if (sectionNr != sectionChange){
 		disposeOf(sectionChange);
 		initializeSection(sectionIndex);
