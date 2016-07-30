@@ -154,7 +154,7 @@ function initializeSection(i) {
     // Player loading starts the gmame
     createSection(i);
     createObstacleContainer(i);
-    //createChargingObstacleContainer(i);
+    createChargingObstacleContainer(i);
 }
 
 function createPlayer() {
