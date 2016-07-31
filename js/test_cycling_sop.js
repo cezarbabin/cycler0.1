@@ -372,7 +372,7 @@ function loop(){
     var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % NRSECTIONS;
     if (sectionNr != sectionChange){
         disposeOf(sectionChange);
-        initializeSection(sectionIndex);
+        //initializeSection(sectionIndex);
         sectionIndex++;
         //console.log(sectionIndex);
     }
