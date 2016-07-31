@@ -5,12 +5,12 @@ var MAKETERRAIN = {
 			generator: PN_GENERATOR,
 			width: width+50,
 			height: height+50,
-			widthSegments: 80,
-			heightSegments: 80,
-			depth: 30,
+			widthSegments: 40,
+			heightSegments: 40,
+			depth: 150,
 			param: 3,
 			filterparam: 1,
-			filter: [ BLUR_FILTER ],
+			filter: [ CIRCLE_FILTER ],
 			postgen: [ MOUNTAINS2_COLORS ],
 			effect: [ DESTRUCTURE_EFFECT ]
 		}

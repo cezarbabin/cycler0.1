@@ -95,6 +95,10 @@ function createLights() {
     ambientLight2 = new THREE.AmbientLight(0xDDC0B2, .4);
     //scene.add(ambientLight);
     //scene.add(ambientLight2);
+    var light = new THREE.SpotLight( 0xFFDDDD,1.2 );
+    light.position = camera.position;
+    light.target.position.set( 0, 0, 0 );
+    scene.add( light );
 }
 
 var Colors = {
@@ -292,19 +296,30 @@ function createSection(index) {
     createDelimiter(pg, delimiterSize, index);
     pg.translate(0, SECTIONHEIGHT/2 + index*SECTIONHEIGHT, 0);
     var pm = new THREE.MeshPhongMaterial({
-                                         color:Colors.brown,
+                                         color:'#3BB9FF',
                                          transparent:true,
                                          opacity:1,
                                          shading:THREE.FlatShading,
                                          });
-    var underWorld = new THREE.Mesh(pg, pm);
+    //var underWorld = new THREE.Mesh(pg, pm);
+    //underWorld.position.z -= 35;
+    //scene.add(underWorld);
     ///////////////////
-    //var underWorld = MAKETERRAIN.WithParams(SECTIONHEIGHT, SECTIONHEIGHT);
-    //underWorld.rotation.x = 90*Math.PI/180;
-    //underWorld.position.z -= 20;
-    //underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
+    var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT);
+    underWorld.rotation.x = 90*Math.PI/180;
+    underWorld.position.x = -(SECTIONHEIGHT-TRAILWIDTH)/3/2;
+    underWorld.position.z -= 35;
+    underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
     OC[index%NRSECTIONS]['underWorld'].push(underWorld);
     scene.add(underWorld);
+    var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT);
+    underWorld.rotation.x = 90*Math.PI/180;
+    underWorld.position.x = (SECTIONHEIGHT-TRAILWIDTH)/3/2;
+    underWorld.position.z -= 35;
+    underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
+    OC[index%NRSECTIONS]['underWorld'].push(underWorld);
+    scene.add(underWorld);
+    
     
     var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 30, 30);
     pg.translate(0, SECTIONHEIGHT/2, 0);
@@ -372,7 +387,7 @@ function loop(){
     var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % NRSECTIONS;
     if (sectionNr != sectionChange){
         disposeOf(sectionChange);
-        //initializeSection(sectionIndex);
+        initializeSection(sectionIndex);
         sectionIndex++;
         //console.log(sectionIndex);
     }
