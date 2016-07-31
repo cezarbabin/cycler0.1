@@ -380,6 +380,7 @@ function loop(){
     
     //console.log(rowNr);
     
+    /*
     if (rowNr < ROWS){
         var minRow = rowNr - 1;
         if (minRow < 0)
@@ -398,6 +399,7 @@ function loop(){
         
         
     }
+    */
     
     updateKeyboard();
     
