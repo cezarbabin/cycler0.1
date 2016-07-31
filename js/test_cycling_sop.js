@@ -13,8 +13,9 @@ var GOC;
 var TRAILWIDTH = 120;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 2000;
-var ROWS = 15;
+var ROWS = 10;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
+var NRSECTIONS = 2;
 
 // LANES
 var LANESPACING = 10;
@@ -40,12 +41,12 @@ function createScene() {
     
     renderer = new THREE.WebGLRenderer({
                                        alpha: true,
-                                       antialias: true
+                                       antialias: false
                                        });
-    renderer.setPixelRatio( window.devicePixelRatio );
+    //renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize(WIDTH, HEIGHT);
     
-   
+    
     
     renderer.shadowMap.enabled = true;
     
@@ -124,15 +125,15 @@ function init() {
     createScene();
     createLights();
     
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < NRSECTIONS; i++) {
         OC.push(new ObjectContainer());
     }
     
     //OC = new ObjectContainer();
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < NRSECTIONS; i++) {
         initializeSection(i);
     }
-    sectionIndex = 3;
+    sectionIndex = NRSECTIONS;
     
     GOC = new ObjectContainer();
     
@@ -146,11 +147,11 @@ function init() {
 }
 
 function initializeSection(i) {
-    OC[i%3].initialize('underWorld');
-    OC[i%3].initialize('trail');
-    OC[i%3].initialize('lane');
-    OC[i%3].initialize('obstacleContainer');
-    OC[i%3].initialize('chargingObstacleContainer');
+    OC[i%NRSECTIONS].initialize('underWorld');
+    OC[i%NRSECTIONS].initialize('trail');
+    OC[i%NRSECTIONS].initialize('lane');
+    OC[i%NRSECTIONS].initialize('obstacleContainer');
+    OC[i%NRSECTIONS].initialize('chargingObstacleContainer');
     // Player loading starts the gmame
     createSection(i);
     createObstacleContainer(i);
@@ -209,9 +210,9 @@ function createChasingBall() {
 }
 
 function createObstacleContainer(index) {
-    for (var r = 0; r < ROWS; r++){
+    for (var r = 1; r < ROWS; r++){
         // random number of obstacles
-        console.log(r);
+        //console.log(r);
         var rnd = 2; //Math.random() * 2 | 0;
         //console.log(r, rnd);
         for (var o = 0; o < rnd; o++){
@@ -247,7 +248,7 @@ function createFallingObstacle(row, laneNr, index){
     fallingObject.position.y = row*ROWSIZE + index*SECTIONHEIGHT;
     fallingObject.position.z = 100;
     fallingObject.position.x = lanes[laneNr];
-    OC[index%3]['obstacleContainer'][row].push(fallingObject);
+    OC[index%NRSECTIONS]['obstacleContainer'][row].push(fallingObject);
     scene.add(fallingObject);
 }
 
@@ -265,7 +266,7 @@ function createChargingObstacle(row, laneNr, index){
     chargingObstacle.position.x = lanes[laneNr];
     chargingObstacle.position.z = 2;
     //console.log(index, row);
-    OC[index%3]['chargingObstacleContainer'].push(chargingObstacle);
+    OC[index%NRSECTIONS]['chargingObstacleContainer'].push(chargingObstacle);
     scene.add(chargingObstacle);
 }
 
@@ -279,7 +280,7 @@ function set(object, name, index){
         object.position.y += displacement;
         loop();
     } else {
-        OC[index%3][name] = object;
+        OC[index%NRSECTIONS][name] = object;
     }
     scene.add(object);
 }
@@ -297,7 +298,12 @@ function createSection(index) {
                                          shading:THREE.FlatShading,
                                          });
     var underWorld = new THREE.Mesh(pg, pm);
-    OC[index%3]['underWorld'].push(underWorld);
+    ///////////////////
+    //var underWorld = MAKETERRAIN.WithParams(SECTIONHEIGHT, SECTIONHEIGHT);
+    //underWorld.rotation.x = 90*Math.PI/180;
+    //underWorld.position.z -= 20;
+    //underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
+    OC[index%NRSECTIONS]['underWorld'].push(underWorld);
     scene.add(underWorld);
     
     var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 30, 30);
@@ -311,7 +317,7 @@ function createSection(index) {
     var trail = new THREE.Mesh(pg, pm);
     trail.position.z = 1;
     trail.position.y = index * SECTIONHEIGHT;
-    OC[index%3]['trail'].push(trail);
+    OC[index%NRSECTIONS]['trail'].push(trail);
     scene.add(trail);
     
     var cols = [Colors.red, Colors.white, Colors.brown]
@@ -333,7 +339,7 @@ function createSection(index) {
                                              shading:THREE.FlatShading,
                                              });
         var lane = new THREE.Mesh(pg, pm);
-        OC[index%3]['lane'].push(lane);
+        OC[index%NRSECTIONS]['lane'].push(lane);
         scene.add(lane);
     }
     
@@ -356,41 +362,48 @@ var sectionChange = 0;
 function loop(){
     
     stats.update();
-    
+    //var delta = clock.getDelta();
     GOC['player'].position.y += speed;
     GOC['chasingBall'].position.y += speed;
     camera.position.y += speed;
     
     
     var rowNr = ((GOC['player'].position.y / ROWSIZE | 0) + 1)%ROWS;
-    var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % 3;
+    var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % NRSECTIONS;
     if (sectionNr != sectionChange){
         disposeOf(sectionChange);
         initializeSection(sectionIndex);
         sectionIndex++;
-        console.log(sectionIndex);
+        //console.log(sectionIndex);
     }
     sectionChange = sectionNr;
     
     //console.log(rowNr);
     
     if (rowNr < ROWS){
-        var minRow = 0//rowNr - 1;
+        var minRow = rowNr - 1;
         if (minRow < 0)
             minRow = 0;
-        var maxRow = ROWS //rowNr + 2;
-        if (maxRow > ROWS)
-            maxRow = ROWS;
-        
-        for (var r = minRow; r < maxRow; r++)
+        var maxRow = rowNr + 1;
+        if (maxRow > ROWS){
+        	maxRow = 0;
+        	for (var r = minRow; r < maxRow; r++)
+            checkRows(sectionNr+1, r);
+        } else {
+        	for (var r = minRow; r < maxRow; r++)
             checkRows(sectionNr, r);
+        }
+            
+
+        
+        
     }
     
     updateKeyboard();
     
     _tick += 1
     var axis = new THREE.Vector3( 5.5, 0, 0 );
-    var angle = -_tick * Math.PI / 64 * speed;
+    var angle = -_tick * speed *  Math.PI / 64;
 	   // matrix is a THREE.Matrix4()
     var _mesh = GOC['chasingBall']
     var _matrix = new THREE.Matrix4()
@@ -417,15 +430,15 @@ function checkRows(sectionNr, rowNr){
     for (var o = 0; o < OC[sectionNr]['obstacleContainer'][rowNr].length; o++){
         var condition = OC[sectionNr]['obstacleContainer'][rowNr][o].position.y - GOC['player'].position.y;
         //console.log(condition, rowNr);
-        if(condition < 150 && OC[sectionNr]['obstacleContainer'][rowNr][o].position.z > 5 ){
-            OC[sectionNr]['obstacleContainer'][rowNr][o].position.z -= 2;
+        if(condition < 250 && OC[sectionNr]['obstacleContainer'][rowNr][o].position.z > 5 ){
+            OC[sectionNr]['obstacleContainer'][rowNr][o].position.z -= speed ;
         }
     }
     for (var o = 0; o < OC[sectionNr]['chargingObstacleContainer'].length; o++){
         var condition = OC[sectionNr]['chargingObstacleContainer'][o].position.y - GOC['player'].position.y;
         //console.log(condition, rowNr);
         if(condition < 650){
-            OC[sectionNr]['chargingObstacleContainer'][o].position.y -= 1;
+            OC[sectionNr]['chargingObstacleContainer'][o].position.y -= speed/2;
         }
     }
 }
@@ -433,18 +446,18 @@ function checkRows(sectionNr, rowNr){
 function disposeOf(sectionNr){
     var arr = ['trail','lane', 'obstacleContainer', 'chargingObstacleContainer', 'underWorld'];
     
-    //disposeOfObject(OC[sectionNr%3]['underWorld']);
-    //disposeOfObject(OC[sectionNr%3]['trail']);
+    //disposeOfObject(OC[sectionNr%NRSECTIONS]['underWorld']);
+    //disposeOfObject(OC[sectionNr%NRSECTIONS]['trail']);
     
     for (var c = 0; c < arr.length; c++){
-        for (var i = 0; i < OC[sectionNr%3][arr[c]].length; i++){
+        for (var i = 0; i < OC[sectionNr%NRSECTIONS][arr[c]].length; i++){
             //console.log(arr[c]);
             if (arr[c] == "obstacleContainer" || arr[c] == "chargingObstacleContainer"){
-                for (var j = 0; j < OC[sectionNr%3][arr[c]][i].length; j++) {
-                    disposeOfObject(OC[sectionNr%3][arr[c]][i][j]);
+                for (var j = 0; j < OC[sectionNr%NRSECTIONS][arr[c]][i].length; j++) {
+                    disposeOfObject(OC[sectionNr%NRSECTIONS][arr[c]][i][j]);
                 }
             } else {
-                disposeOfObject(OC[sectionNr%3][arr[c]][i])
+                disposeOfObject(OC[sectionNr%NRSECTIONS][arr[c]][i])
             }
             
         }
@@ -470,12 +483,12 @@ function updateKeyboard(){
     
     var mesh = GOC.player;
     
-    var moveDistance = 50 * clock.getDelta(); 
+    var moveDistance = 50 * clock.getDelta();
     
-    if ( keyboard.down("A") ) 
+    if ( keyboard.down("A") )
         mesh.translateX( -LANEWIDTH - LANESPACING );
     //console.log('left');
-    if ( keyboard.down("D") ) 
+    if ( keyboard.down("D") )
         mesh.translateX(  + LANEWIDTH + LANESPACING );
     if ( keyboard.pressed("Q") )
         mesh.translateX( -moveDistance );

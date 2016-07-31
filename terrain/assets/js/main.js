@@ -1,12 +1,12 @@
 var MAKETERRAIN = {
-	WithParams : function(parameters){
+	WithParams : function(width, height){
 		var temp = {
 			alea: RAND_MT,
 			generator: PN_GENERATOR,
-			width: 500,
-			height: 700,
-			widthSegments: 30,
-			heightSegments: 30,
+			width: width+50,
+			height: height+50,
+			widthSegments: 80,
+			heightSegments: 80,
 			depth: 30,
 			param: 3,
 			filterparam: 1,

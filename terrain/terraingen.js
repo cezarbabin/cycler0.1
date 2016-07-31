@@ -43,10 +43,13 @@ var TERRAINGEN =
 		{
 			for( var x = 0; x < inNoise.width; ++x )
 			{
-				//inGeometry.vertices.push( new THREE.Vector3( scaleX * ( x + offsetX ), scaleY * ( pixels[id * 4 + 1] ), scaleZ * ( y + offsetZ ) ) );
+			
+					//inGeometry.vertices.push( new THREE.Vector3( scaleX * ( x + offsetX ), scaleY * ( pixels[id * 4 + 1] ), scaleZ * ( y + offsetZ ) ) );
 				positions[id ++] = scaleX * ( x + offsetX );
 				positions[id ++] = scaleY * ( pixels[ (pixel ++) * 4 + 1] );
 				positions[id ++] = scaleZ * ( y + offsetZ );
+				
+				
 			}
 		}
 	},
