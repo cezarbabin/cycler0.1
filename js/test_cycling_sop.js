@@ -10,16 +10,16 @@ var OC = [];
 var GOC;
 
 /// CONSTANTS
-var TRAILWIDTH = 120;
+var TRAILWIDTH = 50;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 2000;
-var ROWS = 10;
+var ROWS = 11;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
 var NRSECTIONS = 2;
 
 // LANES
-var LANESPACING = 10;
-var LANEWIDTH= 20;
+var LANESPACING = 5;
+var LANEWIDTH= 10;
 var lanes = [-LANEWIDTH/2-LANESPACING-LANEWIDTH/2, 0,  +LANEWIDTH/2+LANESPACING+LANEWIDTH/2] ;
 
 window.addEventListener('load', init, false);
@@ -30,20 +30,20 @@ function createScene() {
     scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0xcccccc, 100, 950);
     aspectRatio = WIDTH / HEIGHT;
-    fieldOfView = 320;
+    fieldOfView = 120;
     nearPlane = 1;
     farPlane = 20000;
     
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.z = 80;
-    camera.position.y = -125;
+    camera.position.z = 50;
+    camera.position.y = -35;
     camera.rotation.x = 60 * Math.PI / 180;
     
     renderer = new THREE.WebGLRenderer({
                                        alpha: true,
                                        antialias: false
                                        });
-    //renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize(WIDTH, HEIGHT);
     
     
@@ -163,6 +163,7 @@ function initializeSection(i) {
 }
 
 function createPlayer() {
+    /*
     var manager = new THREE.LoadingManager();
     
     manager.onProgress = function ( item, loaded, total ) {
@@ -171,29 +172,34 @@ function createPlayer() {
     
     var loader = new THREE.OBJLoader( manager );
     
-    /*
-     loader.load( 'https://www.dropbox.com/s/co64929w4w0vmc8/tricycle.obj?dl=0', function ( object) {
+    
+     loader.load( 'tricycle.obj', function ( object) {
      object.traverse( function ( child ) {
      var bodyMat = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
      if ( child instanceof THREE.Mesh ) {
      child.material = bodyMat;
      }
      } );
+     object.scale.x = object.scale.z = object.scale.y = 0.5;
      set(object, 'player');
      });
-     */
+*/
+
     var geom = new THREE.BoxGeometry(20,20,20,40,10);
-    
+
     var mat = new THREE.MeshPhongMaterial({
-                                          color:Colors.brown,
-                                          transparent:true,
-                                          opacity:1,
-                                          shading:THREE.FlatShading,
-                                          });
-    
-    var object = new THREE.Mesh(geom, mat);
-    set(object, 'player');
-    
+        color:Colors.brown,
+        transparent:true,
+        opacity:1,
+        shading:THREE.FlatShading,
+    });
+
+    this.mesh = new THREE.Mesh(geom, mat);
+
+    set(this.mesh, 'player');
+     
+    //var geom = new THREE.BoxGeometry(20,20,20,40,10);
+
 }
 
 function createChasingBall() {
@@ -214,7 +220,7 @@ function createChasingBall() {
 }
 
 function createObstacleContainer(index) {
-    for (var r = 1; r < ROWS; r++){
+    for (var r = 0; r < ROWS; r++){
         // random number of obstacles
         //console.log(r);
         var rnd = 2; //Math.random() * 2 | 0;
@@ -296,7 +302,7 @@ function createSection(index) {
     createDelimiter(pg, delimiterSize, index);
     pg.translate(0, SECTIONHEIGHT/2 + index*SECTIONHEIGHT, 0);
     var pm = new THREE.MeshPhongMaterial({
-                                         color:'#3BB9FF',
+                                         color:'#009900',
                                          transparent:true,
                                          opacity:1,
                                          shading:THREE.FlatShading,
@@ -324,7 +330,7 @@ function createSection(index) {
     var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 30, 30);
     pg.translate(0, SECTIONHEIGHT/2, 0);
     var pm = new THREE.MeshPhongMaterial({
-                                         color:Colors.blue,
+                                         color:'#4cf1a2',
                                          transparent:true,
                                          opacity:1,
                                          shading:THREE.FlatShading,
@@ -338,7 +344,7 @@ function createSection(index) {
     var cols = [Colors.red, Colors.white, Colors.brown]
     
     var dist = ((TRAILWIDTH - delimiterSize * 2) - LANESPACING*4)/ 3; //120-40 - 20
-    
+    /*
     for (var l = 0; l < 3; l++){
         var pg = new THREE.PlaneGeometry(LANEWIDTH, SECTIONHEIGHT, 30, 30);
         if (l == 0)
@@ -357,6 +363,7 @@ function createSection(index) {
         OC[index%NRSECTIONS]['lane'].push(lane);
         scene.add(lane);
     }
+    */
     
 }
 
@@ -395,7 +402,7 @@ function loop(){
     
     //console.log(rowNr);
     
-    /*
+    
     if (rowNr < ROWS){
         var minRow = rowNr - 1;
         if (minRow < 0)
@@ -414,7 +421,7 @@ function loop(){
         
         
     }
-    */
+    
     
     updateKeyboard();
     
@@ -512,11 +519,15 @@ function updateKeyboard(){
     if ( keyboard.pressed("E") )
         mesh.translateX(  moveDistance );
     if ( keyboard.down("S") ){
-        //speed += 5;
+        speed += 8;
+        $('#pb').attr('aria-valuenow', 80 );
         //player.position.z -= 10;
     }
     //$('#pb').attr('aria-valuenow', speed*10);
-    if ( keyboard.up("S") ) {}
-    //speed = 1;
+    if ( keyboard.up("S") ) {
+        speed = 1;
+        $('#pb').attr('aria-valuenow', 20 );
+    }
+        
 }
 

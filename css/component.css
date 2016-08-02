@@ -8,8 +8,9 @@
 
 /* line 72, ../scss/component.scss */
 .progress-factor {
-  font-size: 40px;
+  font-size: 79px;
   flex: 0 1 100%;
+  padding-top: 460px;
 }
 
 /* line 79, ../scss/component.scss */
@@ -17,18 +18,20 @@
   font-size: 1em;
   text-align: center;
   width: 100%;
-  height: 1em;
-  perspective: 12em;
-  perspective-origin: 50% 50%;
+  /*height: 1em;*/
+  perspective: 20em;
+ /* perspective-origin: 50% 50%; */
 
+/* 
 transform: scaleY(.5);
   -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
     -ms-transform: rotate(-90deg);
-    transform: rotate(-90deg);
+    transform: rotate(-90deg); 
   vertical-align: text-top;
-  padding-top: 260px;
+  padding-top: 260px; 
+  */
 }
 
 /* line 91, ../scss/component.scss */
