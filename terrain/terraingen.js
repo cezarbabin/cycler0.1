@@ -97,7 +97,7 @@ var TERRAINGEN =
 		
 		var nbPoints = inNoise.width * inNoise.height;
 		var indices = ( inNoise.width - 1 ) * ( inNoise.height - 1 ) * 2 * 3 ;
-		geometry.addAttribute( 'index', new THREE.BufferAttribute(new Uint32Array( indices ), 1) );
+		geometry.setIndex(new THREE.BufferAttribute(new Uint32Array( indices ), 1));
 		geometry.addAttribute( 'color', new THREE.BufferAttribute(new Float32Array( nbPoints * 3 ), 3) );
 		geometry.addAttribute( 'position', new THREE.BufferAttribute(new Float32Array( nbPoints * 3 ), 3) );
 		

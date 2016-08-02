@@ -3,17 +3,23 @@ camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 renderer, container, clock;
 
 var stats = new Stats();
+//var stats2 = new MemoryStats();
+
+
 
 var clock = new THREE.Clock();
 var keyboard = new KeyboardState();
 var OC = [];
 var GOC;
 
+var particlesPool = [];
+var particlesInUse = [];
+
 /// CONSTANTS
 var TRAILWIDTH = 50;
 var UWWIDTH = 500;
-var SECTIONHEIGHT = 2000;
-var ROWS = 11;
+var SECTIONHEIGHT = 4000;
+var ROWS = 21;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
 var NRSECTIONS = 2;
 
@@ -21,6 +27,10 @@ var NRSECTIONS = 2;
 var LANESPACING = 5;
 var LANEWIDTH= 10;
 var lanes = [-LANEWIDTH/2-LANESPACING-LANEWIDTH/2, 0,  +LANEWIDTH/2+LANESPACING+LANEWIDTH/2] ;
+
+// SPEED
+var SPEEDINITIAL;
+var speed = SPEEDINITIAL = 6;
 
 window.addEventListener('load', init, false);
 
@@ -36,7 +46,7 @@ function createScene() {
     
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.z = 50;
-    camera.position.y = -35;
+    camera.position.y = -85;
     camera.rotation.x = 60 * Math.PI / 180;
     
     renderer = new THREE.WebGLRenderer({
@@ -53,12 +63,18 @@ function createScene() {
     container = document.getElementById('world');
     container.appendChild(renderer.domElement);
     
-    // framerate stats
-    stats = new Stats();
+    // framerate stat
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.bottom = '0px';
     stats.domElement.style.zIndex = 100;
     container.appendChild( stats.domElement );
+    
+    // memory stats
+    //stats2.domElement.style.position = 'fixed';
+    //stats2.domElement.style.right   = '0px';
+    //stats2.domElement.style.top       = '0px';
+    
+    //container.appendChild( stats2.domElement );
     
     // Listen to the screen: if the user resizes it
     // we have to update the camera and the renderer size
@@ -123,6 +139,60 @@ ObjectContainer.prototype.initialize = function(name){
     }
 }
 
+Particle = function(){
+    var geom = new THREE.PlaneGeometry(2,2,2,2);
+    var mat = new THREE.MeshPhongMaterial({
+                                          color:0x009999,
+                                          shininess:0,
+                                          specular:0xffffff,
+                                          shading:THREE.FlatShading
+                                          });
+    this.mesh = new THREE.Mesh(geom,mat);
+}
+
+Particle.prototype.explode = function(pos, color, scale){
+    var _this = this;
+    var _p = this.mesh.parent;
+    this.mesh.material.color = new THREE.Color( color);
+    this.mesh.material.needsUpdate = true;
+    this.mesh.scale.set(scale, scale, scale);
+    var targetX = pos.x + (-1 + Math.random()*2)*50;
+    var targetY = pos.y + (-1 + Math.random()*2)*50;
+    var speed = .6+Math.random()*.2;
+    TweenMax.to(this.mesh.rotation, speed, {x:Math.random()*12, y:Math.random()*12});
+    TweenMax.to(this.mesh.scale, speed, {x:.1, y:.1, z:.1});
+    TweenMax.to(this.mesh.position, speed, {x:targetX, y:targetY, delay:Math.random() *.1, ease:Power2.easeOut, onComplete:function(){
+                if(_p) _p.remove(_this.mesh);
+                _this.mesh.scale.set(1,1,1);
+                particlesPool.unshift(_this);
+                }});
+}
+
+ParticlesHolder = function (){
+    this.mesh = new THREE.Object3D();
+    this.particlesInUse = [];
+}
+
+ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
+    
+    var nPArticles = density;
+    for (var i=0; i<nPArticles; i++){
+        var particle;
+        if (particlesPool.length) {
+            particle = particlesPool.pop();
+        }else{
+            particle = new Particle();
+        }
+        this.mesh.add(particle.mesh);
+        particle.mesh.visible = true;
+        var _this = this;
+        particle.mesh.position.y = pos.y;
+        particle.mesh.position.x = pos.x;
+        //particle.mesh.position.z = pos.z;
+        particle.explode(pos,color, scale);
+    }
+}
+
 var sectionIndex;
 function init() {
     $('#flashText').hide();
@@ -141,6 +211,7 @@ function init() {
     
     GOC = new ObjectContainer();
     
+    createParticles();
     
     GOC.initialize('chasingBall');
     GOC.initialize('player');
@@ -148,6 +219,16 @@ function init() {
     createChasingBall();
     createPlayer();
     
+    
+}
+
+function createParticles(){
+    for (var i=0; i<1; i++){
+        var particle = new Particle();
+        particlesPool.push(particle);
+    }
+    particlesHolder = new ParticlesHolder();
+    scene.add(particlesHolder.mesh);
 }
 
 function initializeSection(i) {
@@ -164,15 +245,15 @@ function initializeSection(i) {
 
 function createPlayer() {
     /*
-    var manager = new THREE.LoadingManager();
-    
-    manager.onProgress = function ( item, loaded, total ) {
-        console.log( item, loaded, total );
-    };
-    
-    var loader = new THREE.OBJLoader( manager );
-    
-    
+     var manager = new THREE.LoadingManager();
+     
+     manager.onProgress = function ( item, loaded, total ) {
+     console.log( item, loaded, total );
+     };
+     
+     var loader = new THREE.OBJLoader( manager );
+     
+     
      loader.load( 'tricycle.obj', function ( object) {
      object.traverse( function ( child ) {
      var bodyMat = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
@@ -183,28 +264,28 @@ function createPlayer() {
      object.scale.x = object.scale.z = object.scale.y = 0.5;
      set(object, 'player');
      });
-*/
-
-    var geom = new THREE.BoxGeometry(20,20,20,40,10);
-
+     */
+    
+    var geom = new THREE.BoxGeometry(10,10,10,10,10);
+    
     var mat = new THREE.MeshPhongMaterial({
-        color:Colors.brown,
-        transparent:true,
-        opacity:1,
-        shading:THREE.FlatShading,
-    });
-
+                                          color:Colors.brown,
+                                          transparent:true,
+                                          opacity:1,
+                                          shading:THREE.FlatShading,
+                                          });
+    
     this.mesh = new THREE.Mesh(geom, mat);
-
+    
     set(this.mesh, 'player');
-     
+    
     //var geom = new THREE.BoxGeometry(20,20,20,40,10);
-
+    
 }
 
 function createChasingBall() {
     var radius = 10;
-    var geometry = new THREE.SphereGeometry( 20, 6, 6 );
+    var geometry = new THREE.SphereGeometry(5, 6, 6 );
     //geometry.translate(0, -35, radius);
     var material = new THREE.MeshBasicMaterial( {
                                                color: 0x000000,
@@ -213,7 +294,7 @@ function createChasingBall() {
                                                } );
     var sphere = new THREE.Mesh( geometry, material );
     sphere.position.z = 21;
-    sphere.position.y -= 70;
+    sphere.position.y -= 45;
     sphere.rotation.z = 90*Math.PI / 180;
     GOC['chasingBall'] = sphere;
     scene.add( sphere );
@@ -327,7 +408,7 @@ function createSection(index) {
     scene.add(underWorld);
     
     
-    var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 30, 30);
+    var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 1, 1);
     pg.translate(0, SECTIONHEIGHT/2, 0);
     var pm = new THREE.MeshPhongMaterial({
                                          color:'#4cf1a2',
@@ -345,25 +426,25 @@ function createSection(index) {
     
     var dist = ((TRAILWIDTH - delimiterSize * 2) - LANESPACING*4)/ 3; //120-40 - 20
     /*
-    for (var l = 0; l < 3; l++){
-        var pg = new THREE.PlaneGeometry(LANEWIDTH, SECTIONHEIGHT, 30, 30);
-        if (l == 0)
-            pg.translate(lanes[0], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
-        if (l == 1)
-            pg.translate(lanes[1], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
-        if (l == 2)
-            pg.translate(lanes[2], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
-        var pm = new THREE.MeshPhongMaterial({
-                                             color:cols[l%2],
-                                             transparent:true,
-                                             opacity:1,
-                                             shading:THREE.FlatShading,
-                                             });
-        var lane = new THREE.Mesh(pg, pm);
-        OC[index%NRSECTIONS]['lane'].push(lane);
-        scene.add(lane);
-    }
-    */
+     for (var l = 0; l < 3; l++){
+     var pg = new THREE.PlaneGeometry(LANEWIDTH, SECTIONHEIGHT, 30, 30);
+     if (l == 0)
+     pg.translate(lanes[0], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
+     if (l == 1)
+     pg.translate(lanes[1], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
+     if (l == 2)
+     pg.translate(lanes[2], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
+     var pm = new THREE.MeshPhongMaterial({
+     color:cols[l%2],
+     transparent:true,
+     opacity:1,
+     shading:THREE.FlatShading,
+     });
+     var lane = new THREE.Mesh(pg, pm);
+     OC[index%NRSECTIONS]['lane'].push(lane);
+     scene.add(lane);
+     }
+     */
     
 }
 
@@ -379,22 +460,71 @@ function createDelimiter(pg, boxSize, index){
 }
 
 var _tick = 0;
-var speed = 3;
+
 var sectionChange = 0;
+
+var filterStrength = 20;
+var frameTime = 0, lastLoop = new Date, thisLoop;
+
 function loop(){
     
+    var thisFrameTime = (thisLoop=new Date) - lastLoop;
+    frameTime+= (thisFrameTime - frameTime) / filterStrength;
+    lastLoop = thisLoop;
+    
     stats.update();
+    //stats2.update();
     //var delta = clock.getDelta();
-    GOC['player'].position.y += speed;
-    GOC['chasingBall'].position.y += speed;
-    camera.position.y += speed;
+    GOC['player'].position.y += speed * frameTime/30;
+    GOC['chasingBall'].position.y += speed * frameTime/30;
+    camera.position.y += speed * frameTime/30;
     
     
     var rowNr = ((GOC['player'].position.y / ROWSIZE | 0) + 1)%ROWS;
     var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % NRSECTIONS;
     if (sectionNr != sectionChange){
-        disposeOf(sectionChange);
+        if (sectionIndex%100 == 0){
+            console.log(sectionIndex);
+        }
+        
+        /*
+         var thread = new Worker('dispose_worker.js');
+         
+         // message received from web worker
+         thread.onmessage = function(e) {
+         output.textContent = e.data;
+         console.log(e.data);
+         }
+         
+         
+         // start web worker
+         thread.postMessage(OC[sectionChange%NRSECTIONS]);
+         
+         */
+        
+        var arr = ['trail','lane', 'obstacleContainer', 'chargingObstacleContainer', 'underWorld'];
+        for (var i = 0; i < arr.length; i++){
+            disposeOf(OC[sectionChange%NRSECTIONS][arr[i]], arr[i]);
+            /*
+             var thread = new Worker('dispose_worker.js');
+             
+             
+             // message received from web worker
+             thread.onmessage = function(e) {
+             output.textContent = e.data;
+             console.log(e.data);
+             }
+             
+             
+             // start web worker
+             thread.postMessage(JSON.stringify(OC[sectionChange%NRSECTIONS][arr[i]][0]));
+             
+             */
+            //setInterval(disposeOf(OC[sectionChange%NRSECTIONS][arr[i]], arr[i]), 60);
+        }
+        
         initializeSection(sectionIndex);
+        
         sectionIndex++;
         //console.log(sectionIndex);
     }
@@ -409,15 +539,15 @@ function loop(){
             minRow = 0;
         var maxRow = rowNr + 1;
         if (maxRow > ROWS){
-        	maxRow = 0;
-        	for (var r = minRow; r < maxRow; r++)
-            checkRows(sectionNr+1, r);
+            maxRow = 0;
+            for (var r = minRow; r < maxRow; r++)
+                checkRows(sectionNr+1, r);
         } else {
-        	for (var r = minRow; r < maxRow; r++)
-            checkRows(sectionNr, r);
+            for (var r = minRow; r < maxRow; r++)
+                checkRows(sectionNr, r);
         }
-            
-
+        
+        
         
         
     }
@@ -428,7 +558,7 @@ function loop(){
     _tick += 1
     var axis = new THREE.Vector3( 5.5, 0, 0 );
     var angle = -_tick * speed *  Math.PI / 64;
-	   // matrix is a THREE.Matrix4()
+       // matrix is a THREE.Matrix4()
     var _mesh = GOC['chasingBall']
     var _matrix = new THREE.Matrix4()
     
@@ -452,41 +582,60 @@ function loop(){
 
 function checkRows(sectionNr, rowNr){
     for (var o = 0; o < OC[sectionNr]['obstacleContainer'][rowNr].length; o++){
-        var condition = OC[sectionNr]['obstacleContainer'][rowNr][o].position.y - GOC['player'].position.y;
+        var object = OC[sectionNr]['obstacleContainer'][rowNr][o];
+        var condition = object.position.y - GOC['chasingBall'].position.y;
+        var condition2 = object.position.x == GOC['chasingBall'].position.x;
         //console.log(condition, rowNr);
-        if(condition < 250 && OC[sectionNr]['obstacleContainer'][rowNr][o].position.z > 5 ){
-            OC[sectionNr]['obstacleContainer'][rowNr][o].position.z -= speed ;
+        //checkParticles(object, condition, condition2);
+        if(condition < 250 && object.position.z > 5 ){
+            object.position.z -= speed ;
         }
+        
     }
     for (var o = 0; o < OC[sectionNr]['chargingObstacleContainer'].length; o++){
-        var condition = OC[sectionNr]['chargingObstacleContainer'][o].position.y - GOC['player'].position.y;
+        var object = OC[sectionNr]['chargingObstacleContainer'][o];
+        var condition = object.position.y - GOC['chasingBall'].position.y;
+        var condition2 = object.position.x == GOC['chasingBall'].position.x;
         //console.log(condition, rowNr);
+        //checkParticles(object, condition, condition2);
         if(condition < 650){
             OC[sectionNr]['chargingObstacleContainer'][o].position.y -= speed/2;
         }
     }
 }
 
-function disposeOf(sectionNr){
-    var arr = ['trail','lane', 'obstacleContainer', 'chargingObstacleContainer', 'underWorld'];
+function checkParticles(object, condition, condition2){
+    if (condition<25 && condition2){
+        scene.remove(object);
+        particlesHolder.spawnParticles(object.position.clone(), 1, Colors.pink, 4);
+    }
     
-    //disposeOfObject(OC[sectionNr%NRSECTIONS]['underWorld']);
-    //disposeOfObject(OC[sectionNr%NRSECTIONS]['trail']);
+}
+
+function disposeOf(arr, name){
+    //console.log(name)
+    //var mainArr = OC[sectionNr%NRSECTIONS];
     
-    for (var c = 0; c < arr.length; c++){
-        for (var i = 0; i < OC[sectionNr%NRSECTIONS][arr[c]].length; i++){
-            //console.log(arr[c]);
-            if (arr[c] == "obstacleContainer" || arr[c] == "chargingObstacleContainer"){
-                for (var j = 0; j < OC[sectionNr%NRSECTIONS][arr[c]][i].length; j++) {
-                    disposeOfObject(OC[sectionNr%NRSECTIONS][arr[c]][i][j]);
-                }
-            } else {
-                disposeOfObject(OC[sectionNr%NRSECTIONS][arr[c]][i])
+    //for (var c = 0; c < arr.length; c++){
+    //for (var i = 0; i < arr.length; i++){
+    if (name == "chargingObstacleContainer"){
+        for (var j = 0; j < arr.length; j++) {
+            disposeOfObject(arr[j]);
+        }
+    } else if (name =='obstacleContainer'){
+        for (var j = 0; j < arr.length; j++) {
+            for (var d = 0; d < 2; d++){
+                disposeOfObject(arr[j][d]);
             }
             
         }
-    }
-    
+        
+    } else {
+        if (arr[0] != undefined)
+            disposeOfObject(arr[0])
+            }
+    //}
+    //}
 }
 
 function disposeOfObject(obj) {
@@ -499,8 +648,8 @@ function disposeOfObject(obj) {
     renderer.dispose(obj.material);
     
     obj = undefined;
+    //console.log('yes')
 }
-
 
 function updateKeyboard(){
     keyboard.update();
@@ -509,11 +658,21 @@ function updateKeyboard(){
     
     var moveDistance = 50 * clock.getDelta();
     
-    if ( keyboard.down("A") )
-        mesh.translateX( -LANEWIDTH - LANESPACING );
-    //console.log('left');
-    if ( keyboard.down("D") )
-        mesh.translateX(  + LANEWIDTH + LANESPACING );
+    if ( keyboard.pressed("A") ) {
+        //console.log("cecece");
+        var possible = mesh.position.x > lanes[0];
+        if (possible){
+            mesh.translateX( -LANEWIDTH - LANESPACING );
+        }
+    }
+    if ( keyboard.pressed("D")  ) {
+        var possible = mesh.position.x < lanes[2];
+        if (possible){
+            mesh.translateX(  + LANEWIDTH + LANESPACING );
+        }
+        
+    }
+  
     if ( keyboard.pressed("Q") )
         mesh.translateX( -moveDistance );
     if ( keyboard.pressed("E") )
@@ -525,9 +684,9 @@ function updateKeyboard(){
     }
     //$('#pb').attr('aria-valuenow', speed*10);
     if ( keyboard.up("S") ) {
-        speed = 1;
+        speed = SPEEDINITIAL;
         $('#pb').attr('aria-valuenow', 20 );
     }
-        
+    
 }
 
