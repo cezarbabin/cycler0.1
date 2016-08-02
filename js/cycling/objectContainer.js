@@ -1,4 +1,6 @@
-ObjectContainer = function(objArray) {};
+ObjectContainer = function(objArray) {
+	this.state = {}
+};
 
 ObjectContainer.prototype.initialize = function(name){
     if (name == 'underWorld' || name == 'trail' || name == 'lane' || name == 'chargingObstacleContainer'){
@@ -9,4 +11,5 @@ ObjectContainer.prototype.initialize = function(name){
             this[name].push([]);
         }
     }
+    this.state[name] = false;
 }

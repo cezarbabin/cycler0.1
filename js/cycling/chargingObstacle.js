@@ -13,5 +13,6 @@ ChargingObstacle = function(row, laneNr, index){
   chargingObstacle.position.z = 2;
   //console.log(index, row);
   OC[index%NRSECTIONS]['chargingObstacleContainer'].push(chargingObstacle);
+  OC[index%NRSECTIONS].state['chargingObstacleContainer'] = true;
   scene.add(chargingObstacle);
 }

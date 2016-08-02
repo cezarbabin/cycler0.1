@@ -44,11 +44,11 @@ function initializeSection(i) {
     OC[i%NRSECTIONS].initialize('chargingObstacleContainer');
     // Player loading starts the gmame
     new Section(i);
-    createObstacleContainer(i);
-    createChargingObstacleContainer(i);
+    fillObstacleContainer(i);
+    fillChargingObstacleContainer(i);
 }
 
-function createObstacleContainer(index) {
+function fillObstacleContainer(index) {
     for (var row = 0; row < ROWS; row++){
         var rnd = 2; 
         for (var o = 0; o < rnd; o++){
@@ -57,13 +57,15 @@ function createObstacleContainer(index) {
             new FallingObstacle(row, rndLane, index);
         }
     }
+    //this.state['obstacleContainer'] = true;
 }
 
-function createChargingObstacleContainer(index) {
+function fillChargingObstacleContainer(index) {
     for (var r = 6; r < ROWS; r++){
         var rndLane = Math.random() * 3 | 0;
         new ChargingObstacle(r, rndLane, index)
     }
+    //this.state['chargingObstacleContainer'] = true;
 }
 
 var _tick = 0;
@@ -90,8 +92,10 @@ function loop(){
             console.log(sectionIndex);
         }
         var arr = ['trail','lane', 'obstacleContainer', 'chargingObstacleContainer', 'underWorld'];
+        var currentContainer = OC[sectionChange%NRSECTIONS]
         for (var i = 0; i < arr.length; i++){
-            utils.disposeOf(OC[sectionChange%NRSECTIONS][arr[i]], arr[i]);
+            if (currentContainer.state[arr[i]] == true)
+                utils.disposeOf(currentContainer[arr[i]], arr[i]);
         }
         initializeSection(sectionIndex);
         sectionIndex++;
