@@ -118,7 +118,8 @@ function loop(){
     
     var rowNr = ((GOC['player'].position.y / ROWSIZE | 0) + 1)%ROWS;
     var sectionNr = (camera.position.y / SECTIONHEIGHT | 0) % NRSECTIONS;
-    var currentContainer = OC[sectionChange%NRSECTIONS]
+    var currentContainer = OC[sectionNr%NRSECTIONS]
+    var previousContainer = OC[sectionChange%NRSECTIONS]
     
     if (sectionNr != sectionChange){
         //if (sectionIndex%100 == 0){
@@ -128,8 +129,8 @@ function loop(){
         var arr = ['trail','lane', 'obstacleContainer', 'chargingObstacleContainer', 'underWorld'];
        
         for (var i = 0; i < arr.length; i++){
-            if (currentContainer.state[arr[i]] == true)
-                utils.disposeOf(currentContainer[arr[i]], arr[i]);
+            if (previousContainer.state[arr[i]] == true)
+                utils.disposeOf(previousContainer[arr[i]], arr[i]);
         }
         console.log(sectionIndex /3 | 0);
         initializeSection(sectionIndex, sectionIndex /3 | 0);

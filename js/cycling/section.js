@@ -20,7 +20,7 @@ Section = function(index) {
   underWorld.position.z -= 35;
   underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
   OC[index%NRSECTIONS]['underWorld'].push(underWorld);
-  OC[index%NRSECTIONS].state['trail'] = true;
+  OC[index%NRSECTIONS].state['underWorld'] = true;
   scene.add(underWorld);
   var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT);
   underWorld.rotation.x = 90*Math.PI/180;
