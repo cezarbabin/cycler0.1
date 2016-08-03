@@ -19,7 +19,7 @@ Scene = function(){
       alpha: true,
       antialias: false
   });
-  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setPixelRatio( window.devicePixelRatio/3 );
   renderer.setSize(WIDTH, HEIGHT);
   
   renderer.shadowMap.enabled = true;

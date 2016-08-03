@@ -2,6 +2,8 @@ var MOUNTAINS2_COLORS =
 {
 	ms_Canvas: null,
 	ms_Gradient: null,
+
+	ms_ColorArray: null,
 	
 	GenerateGradient: function()
 	{
@@ -10,11 +12,11 @@ var MOUNTAINS2_COLORS =
 		
 		var gradient = context.createLinearGradient( 0, 0, 255, 0 );
 		
-		gradient.addColorStop( 0.5, '#0076A3' );
-		gradient.addColorStop( 0.1, '#3BB9FF' );
+		gradient.addColorStop( 0.5, this.ms_ColorArray[0] );
+		gradient.addColorStop( 0.1, this.ms_ColorArray[1] );
 		//gradient.addColorStop( 0.2, '#D3FFCE' );
-		gradient.addColorStop( 0.6, '#336699' );
-		gradient.addColorStop( 0.8, '#3BB9FF' );
+		gradient.addColorStop( 0.6, this.ms_ColorArray[2] );
+		gradient.addColorStop( 0.8, this.ms_ColorArray[3] );
 		
 		context.fillStyle = gradient;
 		context.rect( 0, 0, this.ms_Canvas.width, this.ms_Canvas.height );

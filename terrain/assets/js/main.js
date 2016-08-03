@@ -3,11 +3,11 @@ var MAKETERRAIN = {
 		var temp = {
 			alea: RAND_MT,
 			generator: PN_GENERATOR,
-			width: width+50,
-			height: height+50,
-			widthSegments: 40,
-			heightSegments: 40,
-			depth: 150,
+			width: width+100,
+			height: height+100,
+			widthSegments: 60,
+			heightSegments: 60,
+			depth: 190,
 			param: 3,
 			filterparam: 1,
 			filter: [ CIRCLE_FILTER ],
@@ -24,6 +24,8 @@ var MAKETERRAIN = {
 		
 
 		// Return the Mesh Here
+		//MOUNTAINS2_COLORS.ms_ColorArray = ['#0076A3', '#3BB9FF', '#336699','#3BB9FF' ];
+		MOUNTAINS2_COLORS.ms_ColorArray = ['#a0e7af', '#0eae21', '#1e8bc3','#c4dcc0' ];
 		var mesh = TERRAINGENDEMO.Load(temp);
 		return mesh;
 		//MainLoop();

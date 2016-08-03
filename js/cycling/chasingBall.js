@@ -12,5 +12,18 @@ ChasingBall = function(){
   sphere.position.y -= 45;
   sphere.rotation.z = 90*Math.PI / 180;
   GOC['chasingBall'] = sphere;
+  GOC.state['chasingBall'] = true;
   scene.add( sphere );
+}
+
+ChasingBall.prototype.rotate = function(){
+  _tick += 1
+  var axis = new THREE.Vector3( 5.5, 0, 0 );
+  var angle = -_tick * speed * frameTime/30 * Math.PI / 64;
+     // matrix is a THREE.Matrix4()
+  var _mesh = GOC['chasingBall']
+  var _matrix = new THREE.Matrix4()
+  
+  _matrix.makeRotationAxis( axis.normalize(), angle );
+  _mesh.rotation.setFromRotationMatrix( _matrix );
 }

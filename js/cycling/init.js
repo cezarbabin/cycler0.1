@@ -17,10 +17,10 @@ var particlesPool = [];
 var particlesInUse = [];
 
 /// CONSTANTS
-var TRAILWIDTH = 50;
+var TRAILWIDTH = 60;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 4000;
-var ROWS = 21;
+var ROWS = 41;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
 var NRSECTIONS = 2;
 

@@ -34,7 +34,7 @@ Section = function(index) {
   var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 1, 1);
   pg.translate(0, SECTIONHEIGHT/2, 0);
   var pm = new THREE.MeshPhongMaterial({
-                                       color:'#4cf1a2',
+                                       color:'#EBEBEB',
                                        transparent:true,
                                        opacity:1,
                                        shading:THREE.FlatShading,
