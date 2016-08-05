@@ -20,7 +20,7 @@ var particlesInUse = [];
 var TRAILWIDTH = 60;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 4000;
-var ROWS = 41;
+var ROWS = 31;
 var ROWSIZE = SECTIONHEIGHT/ROWS;
 var NRSECTIONS = 2;
 

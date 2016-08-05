@@ -47,10 +47,10 @@ function initializeSection(i, level) {
     // Player loading starts the gmame
     new Section(i);
 
-    if (level == 0) fillFalling(i);
-    else fillSliding(i);
+    //if (level == 0) fillFalling(i);
     //if (level == 1) fillCharging(i);
-    //if (level == 2) fillSliding(i);
+    //if (level == 2) 
+        fillSliding(i);
     //fillFalling(i);
     //fillCharging(i);
     //fillSimple(i);
@@ -126,14 +126,15 @@ function loop(){
         // Choose type of level (5 sections = 1:30)
            // console.log(sectionIndex);
         //}
-        var arr = ['trail','lane', 'obstacleContainer', 'chargingObstacleContainer', 'underWorld'];
+        var arr = ['trail','lane', 'obstacleContainer', 
+        'chargingObstacleContainer', 'underWorld', 'slidingObstacleContainer'];
        
         for (var i = 0; i < arr.length; i++){
             if (previousContainer.state[arr[i]] == true)
                 utils.disposeOf(previousContainer[arr[i]], arr[i]);
         }
-        console.log(sectionIndex /3 | 0);
-        initializeSection(sectionIndex, sectionIndex /3 | 0);
+        //console.log(sectionIndex /3 | 0);
+        initializeSection(sectionIndex, sectionIndex /7 | 0);
         sectionIndex++;
     }
     sectionChange = sectionNr;

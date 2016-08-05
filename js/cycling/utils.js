@@ -36,7 +36,7 @@ Utils.prototype.disposeOfObject = function(obj){
 Utils.prototype.updateKeyboard = function(){
 	keyboard.update();
   var mesh = GOC.player;
-  var moveDistance = 50 * clock.getDelta();
+  var moveDistance = 70 * clock.getDelta();
   
   if ( keyboard.pressed("A") ) {
       //console.log("cecece");
@@ -75,6 +75,13 @@ Utils.prototype.updateKeyboard = function(){
       //speed = SPEEDINITIAL;
       //$('#pb').attr('aria-valuenow', speed * 10 );
   }
+  if ( keyboard.pressed("Q") ) {
+    //console.log('hi');
+    mesh.translateX( -moveDistance );
+  } 
+  
+  if ( keyboard.pressed("E") )
+    mesh.translateX(  moveDistance );
 }
 
 Utils.prototype.createParticles = function(){
@@ -147,11 +154,6 @@ Utils.prototype.slideObstacles = function(sectionNr, rowNr){
   
   if (obstacle.position.x >= (lanes[2]) || obstacle.position.x <= (lanes[0]))
     this.slidingObstaclesDirect[rowNr] *= -1;
-
-  if (rowNr == 20){
-    console.log('here');
-  }
-  
 
   obstacle.position.x += this.slidingObstaclesDirect[rowNr]/4//this.slidingObstaclesDirect[rowNr/2 | 0];
   
