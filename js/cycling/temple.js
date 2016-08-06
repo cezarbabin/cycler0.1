@@ -1,3 +1,14 @@
+// camera setup
+/*
+camera.position.z = 30;
+camera.position.y = -85;
+camera.rotation.x = 90 * Math.PI / 180;
+
+TRAILWIDTH = 230;
+
+*/
+
+
 Temple = function(index) {
 	//var column = new THREE.BoxGeometry();
 

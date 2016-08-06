@@ -136,9 +136,9 @@ Utils.prototype.initSlidingDirection = function(l){
   for (var i = 0; i< l; i++){
     var r = Math.random();
     if (r < 0.5){
-      this.slidingObstaclesDirect.push(-2)
+      this.slidingObstaclesDirect.push(1)
     } else {
-      this.slidingObstaclesDirect.push(2)
+      this.slidingObstaclesDirect.push(1)
     }
   }
     
@@ -152,10 +152,12 @@ Utils.prototype.slideObstacles = function(sectionNr, rowNr){
 
   var obstacle = container[rowNr];
   
-  if (obstacle.position.x >= (lanes[2]) || obstacle.position.x <= (lanes[0]))
+  if (obstacle.position.x == (lanes[2] + 20) || obstacle.position.x == (lanes[0] - 20))
     this.slidingObstaclesDirect[rowNr] *= -1;
 
-  obstacle.position.x += this.slidingObstaclesDirect[rowNr]/4//this.slidingObstaclesDirect[rowNr/2 | 0];
+  if (GOC['player'].position.y > obstacle.position.y -200 ||
+   GOC['player'].position.y < obstacle.position.y + 100 )
+  obstacle.position.x += this.slidingObstaclesDirect[rowNr]/15//this.slidingObstaclesDirect[rowNr/2 | 0];
   
 }
 

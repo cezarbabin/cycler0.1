@@ -45,14 +45,15 @@ function initializeSection(i, level) {
     OC[i%NRSECTIONS].initialize('simpleObstacleContainer');
     OC[i%NRSECTIONS].initialize('slidingObstacleContainer');
     // Player loading starts the gmame
-    //new Section(i);
-    new Temple(i);
+    new Section(i);
+    //new Temple(i);
+    //new Labirinth(i);
 
     //if (level == 0) fillFalling(i);
     //if (level == 1) fillCharging(i);
     //if (level == 2) 
-        //fillSliding(i);
-    fillFalling(i);
+     //   fillSliding(i);
+    //fillFalling(i);
     //fillCharging(i);
     //fillSimple(i);
     
@@ -91,8 +92,9 @@ function fillSliding(index) {
     var max = lanes[2];
     var min = lanes[0];
     for (var r = 0; r < ROWS; r ++){
-        var pad = Math.random() * (max - min) + min;
-        new SlidingObstacle(r, rndLane, index, pad)
+        for (var j = 0; j < 2; j++) {
+            new SlidingObstacle(r, rndLane, index, j)
+        }
     }
 }
 
@@ -100,13 +102,26 @@ var _tick = 0;
 var sectionChange = 0;
 var filterStrength = 20;
 var frameTime = 0, lastLoop = new Date, thisLoop;
+var frames = 0;
 function loop(){
     var thisFrameTime = (thisLoop=new Date) - lastLoop;
     frameTime+= (thisFrameTime - frameTime) / filterStrength;
     lastLoop = thisLoop;
+    frames +=1;
     
     stats.update();
     stats2.update();
+
+    if (frames % 30 == 0){
+        var sign = Math.random();
+        if (sign > 0.5)
+            sign = -1;
+        else 
+            sign = 1;
+        speed += sign * Math.random()/10;
+        console.log(speed);
+    }
+    
   
     GOC['player'].position.y += speed * frameTime/30;
     if (GOC.state['chasingBall'] == true){

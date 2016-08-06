@@ -1,3 +1,11 @@
+/*
+  camera.position.z = 60;
+  camera.position.y = -85;
+  camera.rotation.x = 70 * Math.PI / 180;
+
+*/
+
+
 Section = function(index) {
 	var delimiterSize = 20;
     
@@ -13,7 +21,7 @@ Section = function(index) {
 
   for (var i = 0; i < 8; i++){
     for (var j = 0; j < 2; j++){
-      var max = 180;
+      var max = 180;   
       var min = 120;
       var depth = Math.random() * (max - min) + min;
       var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT, depth);
@@ -33,7 +41,7 @@ Section = function(index) {
   var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 1, 1);
   pg.translate(0, SECTIONHEIGHT/2, 0);
   var pm = new THREE.MeshPhongMaterial({
-                                       color:'#EBEBEB',
+                                       color:Colors.blue,
                                        transparent:true,
                                        opacity:1,
                                        shading:THREE.FlatShading,

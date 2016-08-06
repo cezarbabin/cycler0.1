@@ -1,5 +1,6 @@
 Lights = function(){
-	hemisphereLight = new THREE.HemisphereLight(0xcccccc,0x000000, .9)
+	//hemisphereLight = new THREE.HemisphereLight(0xcccccc,0x0000ff, .9)
+  hemisphereLight = new THREE.HemisphereLight(0xFCF75E,0x0000ff, .9)
   shadowLight = new THREE.DirectionalLight(0x7ec0ee, .6);
   shadowLight.position.set(150, 350, 350);
   shadowLight.castShadow = true;
@@ -11,18 +12,11 @@ Lights = function(){
   shadowLight.shadow.camera.far = 1000;
   shadowLight.shadow.mapSize.width = 2048;
   shadowLight.shadow.mapSize.height = 2048;
-  scene.add(hemisphereLight);
-  scene.add(shadowLight);
-  
-  ambientLight = new THREE.AmbientLight(0xFFCC00, .2);
-  ambientLight2 = new THREE.AmbientLight(0xDDC0B2, .4);
-  //scene.add(ambientLight);
-  //scene.add(ambientLight2);
-  var light = new THREE.SpotLight( 0xFFDDDD,1.2 );
-  light.position = camera.position;
-  light.target.position.set( 0, 0, 0 );
-  scene.add( light );
 
+  // BLUE LIGHT
+  scene.add(hemisphereLight);
+  //scene.add(shadowLight);
+  
   //var light = new THREE.AmbientLight( 0x008000, .1 );
   //scene.add( light );
 
@@ -32,5 +26,18 @@ Lights = function(){
 
   var light = new THREE.AmbientLight(0xFFC0CB, .2);
   scene.add(light);
+
+  // SECTION LIGHTING
+  var hemiLight = new THREE.DirectionalLight( 0xFCF75E, 0.1 ); 
+  hemiLight.position.set( 1, 0, 0 );
+  scene.add( hemiLight );
+
+  var hemiLight = new THREE.DirectionalLight( 0xFCF75E, 0.1 ); 
+  hemiLight.position.set( -1, 0, 0 );
+  scene.add( hemiLight );
+
+
+           
+  //shadowLight.position.set(0, 1, 0);
 
 }
