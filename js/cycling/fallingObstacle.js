@@ -9,7 +9,7 @@ FallingObstacle = function(row, laneNr, index){
                                              } );
   var fallingObject = new THREE.Mesh( geometry, material );
   fallingObject.position.y = row*ROWSIZE + index*SECTIONHEIGHT;
-  fallingObject.position.z = 100;
+  fallingObject.position.z = 150;
   fallingObject.position.x = lanes[laneNr];
   OC[index%NRSECTIONS]['obstacleContainer'][row].push(fallingObject);
   OC[index%NRSECTIONS].state['obstacleContainer'] = true;

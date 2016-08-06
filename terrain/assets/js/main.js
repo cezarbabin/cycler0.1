@@ -1,13 +1,13 @@
 var MAKETERRAIN = {
-	WithParams : function(width, height){
+	WithParams : function(width, height, depth){
 		var temp = {
 			alea: RAND_MT,
 			generator: PN_GENERATOR,
-			width: width+100,
-			height: height+100,
-			widthSegments: 60,
-			heightSegments: 60,
-			depth: 190,
+			width: 50+150,
+			height: height/8 + 70,
+			widthSegments: 10,
+			heightSegments: 20,
+			depth: depth,
 			param: 3,
 			filterparam: 1,
 			filter: [ CIRCLE_FILTER ],

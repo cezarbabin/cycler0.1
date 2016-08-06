@@ -11,9 +11,9 @@ Scene = function(){
   farPlane = 20000;
   
   camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-  camera.position.z = 50;
+  camera.position.z = 30;
   camera.position.y = -85;
-  camera.rotation.x = 60 * Math.PI / 180;
+  camera.rotation.x = 90 * Math.PI / 180;
   
   renderer = new THREE.WebGLRenderer({
       alpha: true,

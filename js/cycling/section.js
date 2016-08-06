@@ -10,26 +10,25 @@ Section = function(index) {
                                        opacity:1,
                                        shading:THREE.FlatShading,
                                        });
-  //var underWorld = new THREE.Mesh(pg, pm);
-  //underWorld.position.z -= 35;
-  //scene.add(underWorld);
-  ///////////////////
-  var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT);
-  underWorld.rotation.x = 90*Math.PI/180;
-  underWorld.position.x = -(SECTIONHEIGHT-TRAILWIDTH)/3/2;
-  underWorld.position.z -= 35;
-  underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
-  OC[index%NRSECTIONS]['underWorld'].push(underWorld);
-  OC[index%NRSECTIONS].state['underWorld'] = true;
-  scene.add(underWorld);
-  var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT);
-  underWorld.rotation.x = 90*Math.PI/180;
-  underWorld.position.x = (SECTIONHEIGHT-TRAILWIDTH)/3/2;
-  underWorld.position.z -= 35;
-  underWorld.position.y += SECTIONHEIGHT/2 + index*SECTIONHEIGHT;
-  OC[index%NRSECTIONS]['underWorld'].push(underWorld);
-  scene.add(underWorld);
-  
+
+  for (var i = 0; i < 8; i++){
+    for (var j = 0; j < 2; j++){
+      var max = 180;
+      var min = 120;
+      var depth = Math.random() * (max - min) + min;
+      var underWorld = MAKETERRAIN.WithParams((SECTIONHEIGHT-TRAILWIDTH)/3, SECTIONHEIGHT, depth);
+      underWorld.rotation.x = 90*Math.PI/180;
+      if (j == 0)
+        underWorld.position.x = - 120;
+      else
+        underWorld.position.x = 130;
+      underWorld.position.z -= 25;
+      underWorld.position.y += (i+1) * SECTIONHEIGHT/8 + index*SECTIONHEIGHT;
+      OC[index%NRSECTIONS]['underWorld'].push(underWorld);
+      OC[index%NRSECTIONS].state['underWorld'] = true;
+      scene.add(underWorld);
+    }
+  }
   
   var pg = new THREE.PlaneGeometry(TRAILWIDTH, SECTIONHEIGHT, 1, 1);
   pg.translate(0, SECTIONHEIGHT/2, 0);
@@ -49,26 +48,7 @@ Section = function(index) {
   var cols = [Colors.red, Colors.white, Colors.brown]
   
   var dist = ((TRAILWIDTH - delimiterSize * 2) - LANESPACING*4)/ 3; //120-40 - 20
-  /*
-   for (var l = 0; l < 3; l++){
-   var pg = new THREE.PlaneGeometry(LANEWIDTH, SECTIONHEIGHT, 30, 30);
-   if (l == 0)
-   pg.translate(lanes[0], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
-   if (l == 1)
-   pg.translate(lanes[1], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
-   if (l == 2)
-   pg.translate(lanes[2], index*SECTIONHEIGHT + SECTIONHEIGHT/2, 2);
-   var pm = new THREE.MeshPhongMaterial({
-   color:cols[l%2],
-   transparent:true,
-   opacity:1,
-   shading:THREE.FlatShading,
-   });
-   var lane = new THREE.Mesh(pg, pm);
-   OC[index%NRSECTIONS]['lane'].push(lane);
-   scene.add(lane);
-   }
-   */
+
 };
 
 Section.prototype.createDelimiter = function(pg, boxSize, index){

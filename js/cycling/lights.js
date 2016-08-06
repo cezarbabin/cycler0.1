@@ -22,4 +22,15 @@ Lights = function(){
   light.position = camera.position;
   light.target.position.set( 0, 0, 0 );
   scene.add( light );
+
+  //var light = new THREE.AmbientLight( 0x008000, .1 );
+  //scene.add( light );
+
+  
+ // var light = new THREE.AmbientLight( 0xffa500, .2 );
+ // scene.add(light);
+
+  var light = new THREE.AmbientLight(0xFFC0CB, .2);
+  scene.add(light);
+
 }

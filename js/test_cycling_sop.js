@@ -45,13 +45,14 @@ function initializeSection(i, level) {
     OC[i%NRSECTIONS].initialize('simpleObstacleContainer');
     OC[i%NRSECTIONS].initialize('slidingObstacleContainer');
     // Player loading starts the gmame
-    new Section(i);
+    //new Section(i);
+    new Temple(i);
 
     //if (level == 0) fillFalling(i);
     //if (level == 1) fillCharging(i);
     //if (level == 2) 
-        fillSliding(i);
-    //fillFalling(i);
+        //fillSliding(i);
+    fillFalling(i);
     //fillCharging(i);
     //fillSimple(i);
     
