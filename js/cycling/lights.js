@@ -15,7 +15,7 @@ Lights = function(){
 
   // BLUE LIGHT
   scene.add(hemisphereLight);
-  //scene.add(shadowLight);
+  scene.add(shadowLight);
   
   //var light = new THREE.AmbientLight( 0x008000, .1 );
   //scene.add( light );
@@ -28,13 +28,15 @@ Lights = function(){
   scene.add(light);
 
   // SECTION LIGHTING
-  var hemiLight = new THREE.DirectionalLight( 0xFCF75E, 0.1 ); 
+  var hemiLight = new THREE.DirectionalLight( 0xFCF75E, 0.6 ); 
   hemiLight.position.set( 1, 0, 0 );
   scene.add( hemiLight );
 
-  var hemiLight = new THREE.DirectionalLight( 0xFCF75E, 0.1 ); 
+  var hemiLight = new THREE.DirectionalLight( 0xFCF75E, 0.6 ); 
   hemiLight.position.set( -1, 0, 0 );
   scene.add( hemiLight );
+
+
 
 
            

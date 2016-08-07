@@ -17,7 +17,7 @@ var particlesPool = [];
 var particlesInUse = [];
 
 /// CONSTANTS
-var TRAILWIDTH = 80;
+var TRAILWIDTH = 120;
 var UWWIDTH = 500;
 var SECTIONHEIGHT = 4000;
 var ROWS = 31;
@@ -31,4 +31,4 @@ var lanes = [-LANEWIDTH/2-LANESPACING-LANEWIDTH/2, 0,  +LANEWIDTH/2+LANESPACING+
 
 // SPEED
 var SPEEDINITIAL;
-var speed = SPEEDINITIAL = 6;
+var speed = SPEEDINITIAL = 3;

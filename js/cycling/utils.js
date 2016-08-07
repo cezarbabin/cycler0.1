@@ -146,18 +146,31 @@ Utils.prototype.initSlidingDirection = function(l){
 
 Utils.prototype.slideObstacles = function(sectionNr, rowNr){
   var container = OC[sectionNr]['slidingObstacleContainer'];
-  if (this.slidingInitialized == false){
-    this.initSlidingDirection(container.length);
-  }
-
-  var obstacle = container[rowNr];
   
-  if (obstacle.position.x == (lanes[2] + 20) || obstacle.position.x == (lanes[0] - 20))
-    this.slidingObstaclesDirect[rowNr] *= -1;
+  //if (this.slidingInitialized == false){
+  //  this.initSlidingDirection(container.length);
+  //}
 
-  if (GOC['player'].position.y > obstacle.position.y -200 ||
-   GOC['player'].position.y < obstacle.position.y + 100 )
-  obstacle.position.x += this.slidingObstaclesDirect[rowNr]/15//this.slidingObstaclesDirect[rowNr/2 | 0];
+  var obstacleRight = container[2*rowNr];
+  var obstacleLeft = container[2*rowNr+1];
+
+  //console.log(obstacleLeft.position.x, obstacleRight.position.x);
+
+  obstacleRight.position.x -= 0.4
+  obstacleLeft.position.x += 0.4
+  
+  //if (obstacle.position.x == (lanes[2] + 20) || obstacle.position.x == (lanes[0] - 20))
+    //this.slidingObstaclesDirect[rowNr] *= -1;
+
+    /*
+  if (GOC['player'].position.y > obstacleRight.position.y -200 ||
+   GOC['player'].position.y < obstacleRight.position.y + 100 ){
+    console.log("moving");
+    obstacleRight.position.x -= 2
+    obstacleLeft.position.x += 2
+  }
+  */
+  //obstacleRight.position.x += 2/15//this.slidingObstaclesDirect[rowNr/2 | 0];
   
 }
 

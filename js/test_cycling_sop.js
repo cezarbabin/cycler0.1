@@ -6,7 +6,8 @@ var Colors = {
     brown:0x59332e,
     pink:0xF5986E,
     brownDark:0x23190f,
-    blue:0x68c3c0
+    blue:0x68c3c0,
+    green:0x007f00
 };
 
 var sectionIndex;
@@ -45,14 +46,14 @@ function initializeSection(i, level) {
     OC[i%NRSECTIONS].initialize('simpleObstacleContainer');
     OC[i%NRSECTIONS].initialize('slidingObstacleContainer');
     // Player loading starts the gmame
-    new Section(i);
+    //new Section(i);
     //new Temple(i);
-    //new Labirinth(i);
+    new Labirinth(i);
 
     //if (level == 0) fillFalling(i);
     //if (level == 1) fillCharging(i);
     //if (level == 2) 
-     //   fillSliding(i);
+    fillSliding(i);
     //fillFalling(i);
     //fillCharging(i);
     //fillSimple(i);
@@ -87,13 +88,14 @@ function fillCharging(index) {
         new ChargingObstacle(r, rndLane, index)
     }
 }
+var anySlidingObstacles;
 function fillSliding(index) {
     var rndLane = 1;
     var max = lanes[2];
     var min = lanes[0];
-    for (var r = 0; r < ROWS; r ++){
+    for (var r = 0; r < 10; r ++){
         for (var j = 0; j < 2; j++) {
-            new SlidingObstacle(r, rndLane, index, j)
+            new SlidingObstacle(r, index, j)
         }
     }
 }
@@ -112,6 +114,7 @@ function loop(){
     stats.update();
     stats2.update();
 
+    /*
     if (frames % 30 == 0){
         var sign = Math.random();
         if (sign > 0.5)
@@ -121,6 +124,7 @@ function loop(){
         speed += sign * Math.random()/10;
         console.log(speed);
     }
+    */
     
   
     GOC['player'].position.y += speed * frameTime/30;
@@ -152,6 +156,8 @@ function loop(){
         //console.log(sectionIndex /3 | 0);
         initializeSection(sectionIndex, sectionIndex /7 | 0);
         sectionIndex++;
+
+        
     }
     sectionChange = sectionNr;
 
@@ -174,8 +180,11 @@ function loop(){
         }
     }
 
-    var anySlidingObstacles = currentContainer.state['slidingObstacleContainer'] == true;
+    
+    anySlidingObstacles = currentContainer.state['slidingObstacleContainer'] == true;
     if (anySlidingObstacles){
+        //console.log(sectionNr, rowNr)
+        /*
         var minRow = rowNr - 1;
         if (minRow < 0)
             minRow = 0;
@@ -190,6 +199,14 @@ function loop(){
             for (var r = minRow; r < maxRow; r++){utils.slideObstacles(sectionNr, r);}
                 //
         }
+        */
+        var r = (rowNr*ROWSIZE) / (SECTIONHEIGHT/10 -5) | 0;
+
+        console.log(r);
+        utils.slideObstacles(sectionNr, r);
+        //utils.slideObstacles(sectionNr, rowNr)
+
+
         //utils.slideObstalces()
     }
     
